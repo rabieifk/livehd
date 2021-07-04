@@ -33,7 +33,7 @@ std::string_view Slang_tree::create_lnast(std::string_view val) { return lnast->
 std::string_view Slang_tree::create_lnast_var(std::string_view val) {
   std::string_view var_name;
 
-  const auto &it = net2attr.find(val);
+  const auto &it = net2attr.find(val.data());
   if (it == net2attr.end()) {  // OOPS, use before assignment
     auto idx_dot = lnast->add_child(idx_stmts, Lnast_node::create_attr_get());
     auto tmp_var = create_lnast_tmp();
@@ -58,7 +58,7 @@ std::string_view Slang_tree::create_lnast_var(std::string_view val) {
 }
 
 std::string_view Slang_tree::create_lnast_lhs_var(std::string_view val) {
-  const auto &it = net2attr.find(val);
+  const auto &it = net2attr.find(val.data());
   if (it == net2attr.end()) {
     return val;
   }
@@ -121,7 +121,7 @@ bool Slang_tree::process_top_instance(const slang::InstanceSymbol &symbol) {
 
   // Instance bodies are all the same, so if we've visited this one
   // already don't bother doing it again.
-  if (parsed_lnasts.contains(def.name)) {
+  if (parsed_lnasts.find(def.name.data()) != parsed_lnasts.end()) {
     fmt::print("slang_tree module:{} already parsed\n", def.name);
     return false;
   }
@@ -234,7 +234,7 @@ bool Slang_tree::process_top_instance(const slang::InstanceSymbol &symbol) {
   lnast->dump();
 #endif
 
-  parsed_lnasts.insert_or_assign(def.name, lnast);
+  parsed_lnasts.insert_or_assign(def.name.data(), lnast);
   lnast = nullptr;
 
   return true;
@@ -283,7 +283,7 @@ bool Slang_tree::process(const slang::AssignmentExpression &expr) {
     dest_min_bit = process_expression(rs.right());
   }
 
-  auto it = net2attr.find(var_name);
+  auto it = net2attr.find(var_name.data());
   if (it == net2attr.end()) {
     net2attr.emplace(var_name, Net_attr::Local);
     create_declare_bits_stmts(var_name, dest_var_sign, dest_var_bits);

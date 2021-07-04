@@ -1,9 +1,10 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_cat.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "lgraph.hpp"
@@ -24,7 +25,7 @@ protected:
   Lgraph *gc32 = 0;  // Grand child from 3, 2nd
   Lgraph *top2 = 0;
 
-  absl::flat_hash_map<std::string, int> children;
+  std::unordered_map<std::string, int> children;
 
   void add_child(Lgraph *parent, Lgraph *child, std::string_view iname, bool randomize) {
     Node node;
@@ -178,7 +179,7 @@ protected:
 };
 
 TEST_F(Setup_graphs_test, each_local_sub) {
-  absl::flat_hash_map<std::string, int> children2;
+  std::unordered_map<std::string, int> children2;
 
   for (auto &parent : lgs) {
     fmt::print("checking parent:{}\n", parent->get_name());
@@ -219,7 +220,7 @@ TEST_F(Setup_graphs_test, each_local_sub) {
 }
 
 TEST_F(Setup_graphs_test, each_local_sub_twice) {
-  absl::flat_hash_map<std::string, int> children2;
+  std::unordered_map<std::string, int> children2;
 
   for (auto &parent : lgs) {
     fmt::print("checking parent:{}\n", parent->get_name());

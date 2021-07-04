@@ -22,7 +22,7 @@ private:
   const bool        verbose;
   const std::string odir;
 
-  absl::flat_hash_map<int, std::string> color2rgb;
+  std::unordered_map<int, std::string> color2rgb;
 
   void create_color_map(Lgraph *g);
 

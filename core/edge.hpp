@@ -1,6 +1,7 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
 
+#include "absl/hash/hash.h"
 #include "node_pin.hpp"
 
 class Node;
@@ -48,6 +49,8 @@ public:
       return H::combine(std::move(h), s.driver_hidx.get_hash(), s.driver_idx, s.sink_hidx.get_hash(), s.sink_idx);
     }
   };
+
+  using Compact_hasher = absl::Hash<Compact>;
 
   template <typename H>
   friend H AbslHashValue(H h, const XEdge &s) {

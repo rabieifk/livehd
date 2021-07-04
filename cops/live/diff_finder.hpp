@@ -23,7 +23,7 @@ private:
   std::map<Graph_Node, Net_ID>               synth_map;
   std::map<Graph_Node, std::string>          bound2net;
 
-  using Name2graph_type = absl::flat_hash_map<std::string, Lgraph *>;
+  using Name2graph_type = std::unordered_map<std::string, Lgraph *>;
 
   std::set<Graph_Node> fwd_visited;
 

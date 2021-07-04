@@ -52,7 +52,7 @@ void Pass_sat_opt::check_sat_opt(Lgraph *g) {
   // bool              satisfiable;
 
   // std::map<Node_pin::Compact, std::vector<int>> dpin2sat_var;
-  absl::flat_hash_map<Node_pin::Compact, std::vector<int>> dpin2sat_var;
+  std::unordered_map<Node_pin::Compact, std::vector<int>, Node_pin::Compact_hasher> dpin2sat_var;
 
   // determine no of inputs
   // int i_num  = 0;

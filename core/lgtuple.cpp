@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <charconv>
 
+#include "absl/strings/str_cat.h"
 #include "lgraph.hpp"
 #include "likely.hpp"
 
@@ -1198,8 +1199,8 @@ std::tuple<std::shared_ptr<Lgtuple>, bool> Lgtuple::get_mux_tup(const std::vecto
   auto fixing_tup = std::make_shared<Lgtuple>(tup_list[0]->get_name());
 
   // find all the possible keys
-  absl::flat_hash_map<std::string, Node_pin> key_entries;
-  bool                                       first_iter = true;
+  std::unordered_map<std::string, Node_pin> key_entries;
+  bool                                      first_iter = true;
   for (auto tup : tup_list) {
     if (!tup->is_correct())
       fixing_tup->set_issue();

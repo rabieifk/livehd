@@ -40,9 +40,9 @@ void pass_submatch::find_subs(Lgraph *g) {
     int n;
   };
 
-  absl::flat_hash_map<uint64_t, Hash_attr>                hash2attr;
-  absl::flat_hash_map<Node_pin::Compact_driver, uint64_t> dpin2hash;
-  absl::flat_hash_map<Node_pin::Compact_driver, uint64_t> dpin2depth;
+  std::unordered_map<uint64_t, Hash_attr>                                                 hash2attr;
+  std::unordered_map<Node_pin::Compact_driver, uint64_t, Node_pin::Compact_driver_hasher> dpin2hash;
+  std::unordered_map<Node_pin::Compact_driver, uint64_t, Node_pin::Compact_driver_hasher> dpin2depth;
 
   for (const auto &node : g->forward()) {
     std::vector<uint64_t> i_hash;
@@ -67,7 +67,7 @@ void pass_submatch::find_subs(Lgraph *g) {
     }
     std::sort(i_hash.begin(), i_hash.begin() + i_hash.size());
 
-    uint64_t input_key = mmap_lib::woothash64(i_hash.data(), i_hash.size() * 8);
+    uint64_t input_key = mmap_lib::hash64(i_hash.data(), i_hash.size() * 8);
     if (node.is_type_loop_last())
       input_depth = 0;
 
@@ -77,7 +77,7 @@ void pass_submatch::find_subs(Lgraph *g) {
       n |= static_cast<uint64_t>(node.get_type_op());
 
       // want to use port information in hash
-      uint32_t c_key = mmap_lib::waterhash(&n, 4, input_key & 0xFFFF);
+      uint32_t c_key = mmap_lib::hash32(&n, 4, input_key & 0xFFFF);
 
       uint64_t key = (input_key << 2) ^ c_key;
 

@@ -18,7 +18,7 @@ Lgraph *Firmap::do_firrtl_mapping(Lgraph *lg) {
 
   auto        lg_name = lg->get_name();
   std::string lg_source{lg->get_library().get_source(lg->get_lgid())};
-  Lgraph *    new_lg = Lgraph::create(lg->get_path(), lg_name.substr(9), lg_source);
+  Lgraph     *new_lg = Lgraph::create(lg->get_path(), lg_name.substr(9), lg_source);
 
   I(pinmaps.find(lg) != pinmaps.end());  // call add_map_entry first (needed for multithreaded)
 
@@ -690,7 +690,7 @@ void Firmap::map_node_fir_const(Node &old_node, Lgraph *new_lg, PinMap &pinmap) 
   auto const_str = old_node.get_driver_pin("Y").get_name();
   auto pos       = const_str.find("bits");
   auto new_node  = new_lg->create_node_const(
-      const_str.substr(0, pos - 1));  // -1 becasue I ignore the difference between ubits and sbits strings
+       const_str.substr(0, pos - 1));  // -1 becasue I ignore the difference between ubits and sbits strings
   for (auto old_dpin : old_node.out_connected_pins()) {
     pinmap.insert_or_assign(old_dpin, new_node.setup_driver_pin());
   }
@@ -734,7 +734,7 @@ void Firmap::clone_lg_ops_node(Node &old_node, Lgraph *new_lg, PinMap &pinmap) {
 }
 
 void Firmap::clone_subgraph_node(Node &old_node_subg, Lgraph *new_lg, PinMap &pinmap) {
-  auto *    library = Graph_library::instance(new_lg->get_path());
+  auto     *library = Graph_library::instance(new_lg->get_path());
   Node      new_node_subg;
   Sub_node *new_sub;
   Sub_node *old_sub;

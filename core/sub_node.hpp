@@ -11,7 +11,8 @@
 // populate graph_pos for verilog interoperativity. E.g: alphabetical order, or
 // declaration order or ??
 
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
+
 #include "absl/types/span.h"
 #include "lgraph_base_core.hpp"
 #include "rapidjson/document.h"
@@ -73,7 +74,7 @@ private:
 
   std::vector<IO_pin> io_pins;
 
-  absl::flat_hash_map<std::string, Port_ID> name2id;
+  std::unordered_map<std::string, Port_ID> name2id;
   std::vector<Port_ID>                      graph_pos2instance_pid;
   std::vector<Port_ID>                      deleted;
 
@@ -171,7 +172,7 @@ public:
 
     Port_ID instance_pid = 0;
 
-    auto it = name2id.find(io_name);
+    auto it = name2id.find(io_name.data());
     if (it != name2id.end()) {
       instance_pid = it->second;
       I(io_pins.size() > instance_pid);
@@ -196,7 +197,7 @@ public:
       io_pins[instance_pid].dir          = dir;
       io_pins[instance_pid].graph_io_pos = graph_pos;
     }
-    name2id[io_name] = instance_pid;
+    name2id[io_name.data()] = instance_pid;
     I(io_pins[instance_pid].name == io_name);
     if (graph_pos != Port_invalid)
       map_pin_int(instance_pid, graph_pos);
@@ -209,7 +210,7 @@ public:
     I(graph_pos);  // 0 possition is also not used (to catch bugs)
     I(has_pin(io_name));
 
-    Port_ID instance_pid = name2id[io_name];
+    Port_ID instance_pid = name2id[io_name.data()];
     I(io_pins[instance_pid].name == io_name);
     I(io_pins[instance_pid].graph_io_pos == graph_pos || !has_graph_pos_pin(graph_pos));
     io_pins[instance_pid].dir = dir;
@@ -231,7 +232,7 @@ public:
 
   bool has_pin(std::string_view io_name) const {
     I(lgid);
-    const auto it = name2id.find(io_name);
+    const auto it = name2id.find(io_name.data());
     if (it == name2id.end()) {
       return io_name == "%" || io_name == "$";
     }
@@ -252,7 +253,7 @@ public:
     if (io_name == "$" || io_name == "%")
       return 0;
     has_pin(io_name);
-    return name2id.at(io_name);
+    return name2id.at(io_name.data());
   }
 
   Port_ID get_io_pos(std::string_view io_name) const {
@@ -284,14 +285,14 @@ public:
 
   const IO_pin &get_pin(std::string_view io_name) const {
     I(has_pin(io_name));
-    auto instance_pid = name2id.at(io_name);
+    auto instance_pid = name2id.at(io_name.data());
     I(io_pins[instance_pid].name == io_name);
     return io_pins[instance_pid];
   }
 
   const IO_pin &get_graph_output_io_pin(std::string_view io_name) const {
     I(has_pin(io_name));
-    auto instance_pid = name2id.at(io_name);
+    auto instance_pid = name2id.at(io_name.data());
     I(io_pins[instance_pid].name == io_name);
     I(io_pins[instance_pid].dir == Direction::Output);
     return io_pins[instance_pid];
@@ -299,7 +300,7 @@ public:
 
   const IO_pin &get_graph_input_io_pin(std::string_view io_name) const {
     I(has_pin(io_name));
-    auto instance_pid = name2id.at(io_name);
+    auto instance_pid = name2id.at(io_name.data());
     I(io_pins[instance_pid].name == io_name);
     I(io_pins[instance_pid].dir == Direction::Input);
     return io_pins[instance_pid];
@@ -307,7 +308,7 @@ public:
 
   Port_ID get_graph_io_pos(std::string_view io_name) const {
     I(has_pin(io_name));
-    auto instance_pid = name2id.at(io_name);
+    auto instance_pid = name2id.at(io_name.data());
     I(io_pins[instance_pid].name == io_name);
     return io_pins[instance_pid].graph_io_pos;
   }
@@ -337,7 +338,7 @@ public:
     if (io_name == "$")
       return true;
 
-    const auto it = name2id.find(io_name);
+    const auto it = name2id.find(io_name.data());
     if (it == name2id.end())
       return false;
 
@@ -358,7 +359,7 @@ public:
     if (io_name == "%")
       return true;
 
-    const auto it = name2id.find(io_name);
+    const auto it = name2id.find(io_name.data());
     if (it == name2id.end())
       return false;
 
@@ -367,7 +368,7 @@ public:
 
   void add_phys_pin(std::string_view io_name, const Tech_pin &ppin) {
     I(has_pin(io_name));
-    add_phys_pin_int(name2id.at(io_name), ppin);
+    add_phys_pin_int(name2id.at(io_name.data()), ppin);
   }
 
   void add_phys_pin_from_instance_pid(Port_ID instance_pid, const Tech_pin &ppin) {

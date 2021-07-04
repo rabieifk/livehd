@@ -11,9 +11,9 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "lconst.hpp"
 #include "node.hpp"
 #include "node_pin.hpp"

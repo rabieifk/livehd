@@ -1,16 +1,20 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
+
 #include <stack>
 
+#include "absl/hash/hash.h"
+#include "absl/strings/str_cat.h"
 #include "elab_scanner.hpp"
 #include "lnast_ntype.hpp"
 #include "mmap_tree.hpp"
 
-using Lnast_nid                     = mmap_lib::Tree_index;
-using Phi_rtable                    = absl::flat_hash_map<std::string_view, Lnast_nid>;  // rtable = resolve_table
-using Cnt_rtable                    = absl::flat_hash_map<std::string_view, int16_t>;
-using Selc_lrhs_table               = absl::flat_hash_map<Lnast_nid, std::pair<bool, Lnast_nid>>;  // sel -> (lrhs, paired opr node)
-using Tuple_var_1st_scope_ssa_table = absl::flat_hash_map<std::string_view, Lnast_nid>;            // rtable = resolve_table
+using Lnast_nid  = mmap_lib::Tree_index;
+using Phi_rtable = std::unordered_map<std::string_view, Lnast_nid>;  // rtable = resolve_table
+using Cnt_rtable = std::unordered_map<std::string_view, int16_t>;
+using Selc_lrhs_table
+    = std::unordered_map<Lnast_nid, std::pair<bool, Lnast_nid>, absl::Hash<Lnast_nid>>;  // sel -> (lrhs, paired opr node)
+using Tuple_var_1st_scope_ssa_table = std::unordered_map<std::string_view, Lnast_nid>;   // rtable = resolve_table
 
 // tricky old C macro to avoid redundant code from function overloadings
 #define CREATE_LNAST_NODE(type)                                                                                \
@@ -172,20 +176,21 @@ private:
   std::string_view create_tmp_var();
 
   // hierarchical statements node -> symbol table
-  absl::flat_hash_map<Lnast_nid, Phi_rtable>       phi_resolve_tables;
-  absl::flat_hash_map<Lnast_nid, Cnt_rtable>       ssa_rhs_cnt_tables;
-  absl::flat_hash_map<Lnast_nid, Selc_lrhs_table>  selc_lrhs_tables;
-  absl::flat_hash_map<Lnast_nid, Phi_rtable>       new_added_phi_node_tables;  // for each if-subtree scope
-  absl::flat_hash_set<std::string_view>            tuplized_table;
-  absl::flat_hash_map<std::string_view, Lnast_nid> candidates_update_phi_resolve_table;
-  absl::flat_hash_map<std::string_view, int16_t>   global_ssa_lhs_cnt_table;
-  absl::flat_hash_map<Lnast_nid, Phi_rtable>
+  using Lnast_nid_hasher = absl::Hash<Lnast_nid>;
+  std::unordered_map<Lnast_nid, Phi_rtable, Lnast_nid_hasher>      phi_resolve_tables;
+  std::unordered_map<Lnast_nid, Cnt_rtable, Lnast_nid_hasher>      ssa_rhs_cnt_tables;
+  std::unordered_map<Lnast_nid, Selc_lrhs_table, Lnast_nid_hasher> selc_lrhs_tables;
+  std::unordered_map<Lnast_nid, Phi_rtable, Lnast_nid_hasher>      new_added_phi_node_tables;  // for each if-subtree scope
+  std::unordered_set<std::string_view>                             tuplized_table;
+  std::unordered_map<std::string_view, Lnast_nid>                  candidates_update_phi_resolve_table;
+  std::unordered_map<std::string_view, int16_t>                    global_ssa_lhs_cnt_table;
+  std::unordered_map<Lnast_nid, Phi_rtable, Lnast_nid_hasher>
       tuple_var_1st_scope_ssa_tables;  // for chaining parent tuple-chain and local tuple chain, only record the first tuple
                                        // variable appeared in each local scope
-  absl::flat_hash_set<std::string> collected_hier_tuple_reg_name;
+  std::unordered_set<std::string> collected_hier_tuple_reg_name;
 
   // populated during LG->LN pass, maps name -> bitwidth
-  absl::flat_hash_map<std::string, uint32_t> from_lgraph_bw_table;
+  std::unordered_map<std::string, uint32_t> from_lgraph_bw_table;
 
   uint32_t tup_internal_cnt = 0;
 

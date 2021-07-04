@@ -15,7 +15,7 @@
 #include "pass.hpp"
 #include "prp_lnast.hpp"
 
-using FlatHashMap = absl::flat_hash_map<std::string_view, std::string_view>;
+using FlatHashMap = std::unordered_map<std::string_view, std::string_view>;
 
 bool Semantic_check::is_temp_var(std::string_view node_name) {
   if (node_name[0] == '_' && node_name[1] == '_' && node_name[2] == '_') {
@@ -307,7 +307,7 @@ void Semantic_check::resolve_read_write_lists(Lnast *lnast) {
   // Check also to look for output variables are not written to that should be written to
   for (auto node_name : perm_write_dict) {
     // Resolve Write and Read Dicts
-    if (node_name.first[0] != '%' && perm_read_dict.contains(node_name.first)) {
+    if (node_name.first[0] != '%' && perm_read_dict.find(node_name.first) != perm_read_dict.end()) {
       perm_write_dict.erase(node_name.first);
       // Make sure that if output variable is declared, it is written to
     } else if (node_name.first[0] == '%') {

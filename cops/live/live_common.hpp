@@ -1,7 +1,8 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
 
-#include "absl/container/flat_hash_set.h"
+#include <unordered_set>
+
 #include "lgedgeiter.hpp"
 #include "lgraph.hpp"
 
@@ -32,9 +33,9 @@ public:
 
 // resolves which bits are dependencies of the current bit based on node type
 // when propagating backwards
-int resolve_bit(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, absl::flat_hash_set<uint32_t> &bits);
+int resolve_bit(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, std::unordered_set<uint32_t> &bits);
 
 // resolves which bits are dependencies of the current bit based on node type
 // when propagating backwards
-int resolve_bit_fwd(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, absl::flat_hash_set<uint32_t> &bits);
+int resolve_bit_fwd(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, std::unordered_set<uint32_t> &bits);
 }  // namespace Live

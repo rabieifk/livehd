@@ -568,7 +568,7 @@ void Cprop::try_connect_lgcpp(const Node &node) {
   const auto &sub = node.get_type_sub_node();
   const auto &reg = Lgcpp_plugin::get_registry();
 
-  auto it = reg.find(sub.get_name());
+  auto it = reg.find(sub.get_name().data());
   if (it == reg.end())
     return;
 
@@ -727,7 +727,7 @@ void Cprop::tuple_mux_mut(Node &node) {
 }
 
 void Cprop::tuple_flop_mut(Node &node) {
-  I(!tuple_done.contains(node.get_compact()));
+  I(tuple_done.find(node.get_compact()) == tuple_done.end());
 
   if (!node.has_outputs())
     return;
@@ -1015,7 +1015,7 @@ void Cprop::tuple_subgraph(const Node &node) {
     // Still a blackbox, not much to do
     for (const auto &e : node.inp_edges()) {
       auto parent_node = e.driver.get_node();
-      if (parent_node.is_type_tup() && !node2tuple.contains(e.driver.get_node().get_compact())) {
+      if (parent_node.is_type_tup() && node2tuple.find(e.driver.get_node().get_compact()) == node2tuple.end()) {
         tuple_issues = true;
         return;
       }
@@ -1735,7 +1735,8 @@ void Cprop::reconnect_tuple_add(Node &node) {
     } else if (sink_type == Ntype_op::Get_mask  // get_mask handles tuples at both inputs
                || sink_type == Ntype_op::TupAdd
                || (sink_type == Ntype_op::Mux && e.sink.get_pid()
-                   && !tuple_done.contains(e.sink.get_node().get_compact()))  // mux handles tuples at inputs, not select
+                   && tuple_done.find(e.sink.get_node().get_compact())
+                          == tuple_done.end())  // mux handles tuples at inputs, not select
                || sink_type == Ntype_op::TupGet
                || (sink_type == Ntype_op::SHL && e.sink.get_pid())  // SHL handles tuples at B (not a)
     ) {
@@ -1982,7 +1983,7 @@ void Cprop::tuple_pass(Lgraph *lg) {
   for (auto iter = 0; iter < 6; ++iter) {
     tuple_issues = iter == 0;  // First iter may not be correct if there are flops or subgraphs
     for (auto node : lg->forward(hier)) {
-      if (tuple_done.contains(node.get_compact()))
+      if (tuple_done.find(node.get_compact()) != tuple_done.end())
         continue;
 
       auto op = node.get_type_op();
@@ -2197,14 +2198,14 @@ void Cprop::bwd_del_node(Node &node) {
 
   I(!Ntype::is_loop_last(node.get_type_op()));
 
-  absl::flat_hash_set<Node::Compact> potential_set;
-  std::deque<Node>                   potential;
+  std::unordered_set<Node::Compact, Node::Compact_hasher> potential_set;
+  std::deque<Node>                                        potential;
 
   for (const auto &e : node.inp_edges()) {
     if (e.driver.is_graph_io())
       continue;
     // if (potential_set.contains(node.get_compact()))
-    if (potential_set.contains(e.driver.get_node().get_compact()))
+    if (potential_set.find(e.driver.get_node().get_compact()) != potential_set.end())
       continue;
     potential.emplace_back(e.driver.get_node());
     // potential_set.insert(node.get_compact());
@@ -2224,7 +2225,7 @@ void Cprop::bwd_del_node(Node &node) {
         if (e.driver.is_graph_io())
           continue;
         auto d_node = e.driver.get_node();
-        if (potential_set.contains(d_node.get_compact()))
+        if (potential_set.find(d_node.get_compact()) != potential_set.end())
           continue;
         potential.emplace_back(e.driver.get_node());
         potential_set.insert(d_node.get_compact());

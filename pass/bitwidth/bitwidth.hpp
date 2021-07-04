@@ -19,10 +19,9 @@ protected:
 
   static Attr get_key_attr(std::string_view key);
 
-  bool                                                         not_finished;
-  absl::flat_hash_map<Node_pin::Compact_class, Bitwidth_range> bwmap;  // bwmap indexing with dpin_compact_class, nid
-  // absl::flat_hash_map<Node_pin::Compact_flat , Bitwidth_range> bwmap_flat;  // bwmap indexing with dpin_compact_flat, (lgid, nid)
-  // absl::flat_hash_map<Node_pin::Compact      , Bitwidth_range> bwmap_hier;  // bwmap indexing with dpin_compact,      (hidx, nid)
+  bool not_finished;
+  std::unordered_map<Node_pin::Compact_class, Bitwidth_range, Node_pin::Compact_class_hasher>
+      bwmap;  // bwmap indexing with dpin_compact_class, nid
 
   void adjust_bw(Node_pin &&dpin, const Bitwidth_range &bw);
   void adjust_bw(Node_pin &dpin, const Bitwidth_range &bw);

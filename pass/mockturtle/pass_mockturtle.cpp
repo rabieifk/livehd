@@ -785,7 +785,7 @@ void Pass_mockturtle::convert_mockturtle_to_KLUT() {
     // mapping the po driving signal between original mig and the synthsized one
     std::vector<mockturtle::mig_network::signal>                                          mig_pos_drivers_original;
     std::vector<mockturtle::mig_network::signal>                                          mig_pos_drivers_synth;
-    absl::flat_hash_map<mockturtle::mig_network::signal, mockturtle::mig_network::signal> mig_synth_po_sigs_map;
+    std::unordered_map<mockturtle::mig_network::signal, mockturtle::mig_network::signal> mig_synth_po_sigs_map;
 
     mt_ntk.foreach_po([&](const auto &n) { mig_pos_drivers_original.emplace_back(n); });
 
@@ -854,8 +854,8 @@ void Pass_mockturtle::convert_mockturtle_to_KLUT() {
     klut_ntk.foreach_pi([&](const auto &n) { klut_inps.emplace_back(n); });
     klut_ntk.foreach_po([&](const auto &n) { klut_outs.emplace_back(n); });
 
-    absl::flat_hash_map<mockturtle::mig_network::node, mockturtle::klut_network::node>     mig_pi2klut_pi;
-    absl::flat_hash_map<mockturtle::mig_network::signal, mockturtle::klut_network::signal> mig_po2klut_po;
+    std::unordered_map<mockturtle::mig_network::node, mockturtle::klut_network::node>     mig_pi2klut_pi;
+    std::unordered_map<mockturtle::mig_network::signal, mockturtle::klut_network::signal> mig_po2klut_po;
     auto                                                                                   mig_inp_iter  = mig_inps.begin();
     auto                                                                                   klut_inp_iter = klut_inps.begin();
     while (mig_inp_iter != mig_inps.end()) {

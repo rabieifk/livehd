@@ -11,9 +11,10 @@
 #include <mutex>
 #include <string>
 #include <tuple>
+#include <unordered_map>
+#include <unordered_set>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include "absl/hash/hash.h"
 #include "firrtl.pb.h"
 
 #pragma GCC diagnostic pop
@@ -27,8 +28,8 @@
 
 class Inou_firrtl : public Pass {
 protected:
-  static inline absl::flat_hash_map<firrtl::FirrtlPB_Expression_PrimOp_Op, std::string> op2firsub;
-  inline static std::mutex                                                              lgs_mutex;
+  static inline std::unordered_map<firrtl::FirrtlPB_Expression_PrimOp_Op, std::string> op2firsub;
+  inline static std::mutex                                                             lgs_mutex;
 
   enum class Leaf_type { Const_num, Const_str, Ref };
   //----------- FOR toLNAST ----------
@@ -173,72 +174,77 @@ protected:
   void                         CheckTuple(Lnast &ln, const Lnast_nid &tup_node, firrtl::FirrtlPB_Module_UserModule *umod);
   void                         HandleMemTup(Lnast &ln, const Lnast_nid &ref_node, firrtl::FirrtlPB_Module_UserModule *umod);
   void                         CheckRefForComp(Lnast &ln, const Lnast_nid &ref_node, firrtl::FirrtlPB_Module_UserModule *umod);
-  firrtl::FirrtlPB_Type *      CreateTypeObject(uint32_t bitwidth);
+  firrtl::FirrtlPB_Type       *CreateTypeObject(uint32_t bitwidth);
   firrtl::FirrtlPB_Expression *CreateULitExpr(const uint32_t &val);
   void                         CreateSubmodInst(Lnast &ln, const Lnast_nid &fcall_node, firrtl::FirrtlPB_Module_UserModule *umod);
   std::string_view             ConvergeFCallName(const std::string_view func_out, const std::string_view func_inp);
 
 private:
   //----------- For toLNAST ----------
-  absl::flat_hash_set<std::string> input_names;
-  absl::flat_hash_set<std::string> output_names;
-  absl::flat_hash_set<std::string> memory_names;
-  absl::flat_hash_set<std::string> wire_names;
-  absl::flat_hash_set<std::string> is_invalid_table;
-  absl::flat_hash_set<std::string> async_rst_names;
-  absl::flat_hash_set<std::string> mport_usage_visited;
+  std::unordered_set<std::string> input_names;
+  std::unordered_set<std::string> output_names;
+  std::unordered_set<std::string> memory_names;
+  std::unordered_set<std::string> wire_names;
+  std::unordered_set<std::string> is_invalid_table;
+  std::unordered_set<std::string> async_rst_names;
+  std::unordered_set<std::string> mport_usage_visited;
 
   // Maps a register name to its q_pin
-  absl::flat_hash_map<std::string, std::string> reg2qpin;
+  std::unordered_map<std::string, std::string> reg2qpin;
   // Maps an instance name to the module name.
-  absl::flat_hash_map<std::string, std::string> inst_to_mod_map;
+  std::unordered_map<std::string, std::string> inst_to_mod_map;
   // Maps (module name + I/O name) pair to direction of that I/O in that module.
-  absl::flat_hash_map<std::pair<std::string, std::string>, uint8_t> mod_to_io_dir_map;
+  std::unordered_map<std::pair<std::string, std::string>, uint8_t, absl::Hash<std::pair<std::string, std::string>>>
+      mod_to_io_dir_map;
   /* Used when a submodule inst is created, have to specify bw of all IO in module.
      Maps module name to list of tuples of (signal name + signal biwdith + signal dir + sign). */
-  absl::flat_hash_map<std::string, absl::flat_hash_set<std::tuple<std::string, uint32_t, uint8_t, bool>>> mod_to_io_map;
+  std::unordered_map<std::string, std::unordered_set<std::tuple<std::string, uint32_t, uint8_t, bool>,
+                                                     absl::Hash<std::tuple<std::string, uint32_t, uint8_t, bool>>>>
+      mod_to_io_map;
   // Map used by external modules to indicate parameters names + values.
-  absl::flat_hash_map<std::string, absl::flat_hash_set<std::pair<std::string, std::string>>> emod_to_param_map;
+  std::unordered_map<std::string,
+                     std::unordered_set<std::pair<std::string, std::string>, absl::Hash<std::pair<std::string, std::string>>>>
+      emod_to_param_map;
 
-  absl::flat_hash_map<std::string, std::pair<firrtl::FirrtlPB_Expression, firrtl::FirrtlPB_Expression>> reg_name2rst_init_expr;
+  std::unordered_map<std::string, std::pair<firrtl::FirrtlPB_Expression, firrtl::FirrtlPB_Expression>> reg_name2rst_init_expr;
 
-  absl::flat_hash_map<std::string, uint8_t>     mem2port_cnt;
-  absl::flat_hash_map<std::string, uint8_t>     mem2wensize;
-  absl::flat_hash_map<std::string, uint8_t>     mem2rd_latency;
-  absl::flat_hash_map<std::string, Lnast_nid>   mem2initial_idx;
-  absl::flat_hash_map<std::string, std::string> mport2mem;
+  std::unordered_map<std::string, uint8_t>     mem2port_cnt;
+  std::unordered_map<std::string, uint8_t>     mem2wensize;
+  std::unordered_map<std::string, uint8_t>     mem2rd_latency;
+  std::unordered_map<std::string, Lnast_nid>   mem2initial_idx;
+  std::unordered_map<std::string, std::string> mport2mem;
   // control how many bits should be shifted at the bit-vector for masked mem_wr_enable
-  absl::flat_hash_map<std::string, uint32_t>                 mport2mask_bitvec;
-  absl::flat_hash_map<std::string, uint8_t>                  mport2mask_cnt;
-  absl::flat_hash_map<std::string, uint8_t>                  mem2one_wr_mport;
-  absl::flat_hash_map<std::string, std::vector<std::string>> mem2din_fields;
+  std::unordered_map<std::string, uint32_t>                 mport2mask_bitvec;
+  std::unordered_map<std::string, uint8_t>                  mport2mask_cnt;
+  std::unordered_map<std::string, uint8_t>                  mem2one_wr_mport;
+  std::unordered_map<std::string, std::vector<std::string>> mem2din_fields;
   // mem -> <(rd_port_name1,1), (rd_port_name_foo, 7)>
-  absl::flat_hash_map<std::string, std::vector<std::pair<std::string, uint8_t>>> mem2rd_mports;
+  std::unordered_map<std::string, std::vector<std::pair<std::string, uint8_t>>> mem2rd_mports;
 
   uint32_t dummy_expr_node_cnt;
   uint32_t tmp_var_cnt;
   uint32_t seq_cnt;
 
   //----------- FOR toFIRRTL ---------
-  absl::flat_hash_map<std::string, firrtl::FirrtlPB_Port *>      io_map;
-  absl::flat_hash_map<std::string, firrtl::FirrtlPB_Statement *> reg_wire_map;
+  std::unordered_map<std::string, firrtl::FirrtlPB_Port *>      io_map;
+  std::unordered_map<std::string, firrtl::FirrtlPB_Statement *> reg_wire_map;
   // Contains wires that need to be renamed when found (mainly due to func. calls)
-  absl::flat_hash_map<std::string, std::string> wire_rename_map;
+  std::unordered_map<std::string, std::string> wire_rename_map;
 
   /* Since range and bit_sel nodes are separated, this map is used to track
    * the name used by the range node and then the low/high nodes. */
-  absl::flat_hash_map<std::string, std::pair<Lnast_nid, Lnast_nid>> name_to_range_map;
+  std::unordered_map<std::string, std::pair<Lnast_nid, Lnast_nid>> name_to_range_map;
 
   // This tracks the LHS name used for a dot node then the two other children.
-  absl::flat_hash_map<std::string, std::pair<Lnast_nid, Lnast_nid>> dot_map;
+  std::unordered_map<std::string, std::pair<Lnast_nid, Lnast_nid>> dot_map;
 
   // This indicates which register have async reset (if not on here, it's sync)
-  absl::flat_hash_set<std::string_view> async_regs;
+  std::unordered_set<std::string_view> async_regs;
 
   // This maps a port name to the tuple that defines that port's attributes.
-  absl::flat_hash_map<std::string_view, Lnast_nid> pname_to_tup_map;
+  std::unordered_map<std::string_view, Lnast_nid> pname_to_tup_map;
   // This map tracks all of the ports associated with a specific memory.
-  absl::flat_hash_map<std::string_view, absl::flat_hash_set<std::string_view>> mem_to_ports_lists;
+  std::unordered_map<std::string_view, std::unordered_set<std::string_view>> mem_to_ports_lists;
 
 public:
   Inou_firrtl(const Eprp_var &var);

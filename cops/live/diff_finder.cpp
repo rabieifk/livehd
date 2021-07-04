@@ -166,7 +166,7 @@ id idx     = start_boundary.idx;
       continue;
   id next = current->get_node(out.get_inp_pin()).get_nid();
 
-    absl::flat_hash_set<uint32_t> relevant_bits;
+    std::unordered_set<uint32_t> relevant_bits;
     int found = resolve_bit_fwd(current, next, start_boundary.bit, out.get_inp_pin().get_pid(), relevant_bits);
     if (found < 0)
       continue;
@@ -314,7 +314,7 @@ id original_idx     = original_boundary.idx;
 
   for (auto &inp : current->inp_edges(idx)) {
     // in cases like join/pick we only propagate to a specific bit
-    absl::flat_hash_set<uint32_t> useful_bits;
+    std::unordered_set<uint32_t> useful_bits;
     int found_bit = resolve_bit(current, idx, start_boundary.bit, inp.get_inp_pin().get_pid(), useful_bits);
     if (found_bit == -1)  // do not propagate through this pid
       continue;

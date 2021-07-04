@@ -88,7 +88,7 @@ void Label_synth::collapse_merge(int dst) {
     return;
 
   collapse_set.insert(dst);
-  if (collapse_set.contains(it->second))
+  if (collapse_set.find(it->second) != collapse_set.end())
     return;
 
   recursion++;

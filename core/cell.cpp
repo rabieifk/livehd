@@ -82,7 +82,7 @@ Ntype::_init::_init() {
 
   int pos = 0;
   for (auto e : cell_name) {
-    cell_name_map[e] = static_cast<Ntype_op>(pos);
+    cell_name_map[e.data()] = static_cast<Ntype_op>(pos);
     ++pos;
   }
 }
@@ -256,7 +256,7 @@ constexpr std::string_view Ntype::get_sink_name_slow(Ntype_op op, int pid) {
 }
 
 bool Ntype::has_sink(Ntype_op op, std::string_view str) {
-  auto it = name2pid.find(str);
+  auto it = name2pid.find(str.data());
   if (it == name2pid.end()) {
     if (std::isdigit(str[0]) && is_unlimited_sink(op))
       return true;

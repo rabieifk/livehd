@@ -4,9 +4,9 @@
 #include <iostream>
 #include <map>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "edge.hpp"
 #include "iassert.hpp"
 #include "lgedge.hpp"
@@ -26,7 +26,7 @@ protected:
   static inline constexpr std::string_view unknown_io = "unknown";
   Graph_library *                          library;
 
-  absl::flat_hash_map<uint32_t, uint32_t> idx_insert_cache;
+  std::unordered_map<uint32_t, uint32_t> idx_insert_cache;
 
   Index_id create_node_space(const Index_id idx, const Port_ID dst_pid, const Index_id master_nid, const Index_id root_nid);
   Index_id get_space_output_pin(const Index_id idx, const Port_ID dst_pid, Index_id &root_nid);

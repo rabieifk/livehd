@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "absl/hash/hash.h"
 #include "lgraph_base_core.hpp"
 #include "mmap_tree.hpp"
 #include "node.hpp"
@@ -17,7 +18,7 @@ protected:
 
   // store last tree index written for each component type (costs a bit to set up, but drops write time from O(n^2) -> O(n))
   // TODO: find a way of determining the number of synth types in an lgraph
-  absl::flat_hash_map<Tree_index, std::array<Tree_index, 25>> last_free;
+  std::unordered_map<Tree_index, std::array<Tree_index, 25>, absl::Hash<Tree_index>> last_free;
 
 public:
   // do not copy node trees if possible, very slow

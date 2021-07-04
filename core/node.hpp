@@ -1,9 +1,9 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
 
-#include "absl/container/flat_hash_set.h"
-//#include "absl/container/inlined_vector.h"
+#include <unordered_set>
 
+#include "absl/hash/hash.h"
 #include "cell.hpp"
 #include "hierarchy.hpp"
 #include "lconst.hpp"
@@ -18,7 +18,7 @@ using Node_iterator = std::vector<Node>;
 
 class Node {
 protected:
-  Lgraph *        top_g;
+  Lgraph         *top_g;
   mutable Lgraph *current_g;
   Hierarchy_index hidx;
   Index_id        nid;
@@ -89,6 +89,8 @@ public:
     };
   };
 
+  using Compact_hasher = absl::Hash<Compact>;
+
   class __attribute__((packed)) Compact_flat {
   protected:
     uint32_t lgid;
@@ -126,6 +128,8 @@ public:
     };
   };
 
+  using Compact_flat_hasher = absl::Hash<Compact_flat>;
+
   class __attribute__((packed)) Compact_class {
   protected:
     uint64_t nid : Index_bits;
@@ -161,6 +165,8 @@ public:
       return H::combine(std::move(h), s.nid);
     };
   };
+
+  using Compact_class_hasher = absl::Hash<Compact_class>;
 
   void update(const Hierarchy_index &_hidx);
 
@@ -207,9 +213,9 @@ public:
     return Compact_class(nid);
   }
 
-  Lgraph *       get_top_lgraph() const { return top_g; }
-  Lgraph *       get_class_lgraph() const { return current_g; }
-  Lgraph *       get_lg() const { return current_g; }  // To handle hierarchical API
+  Lgraph        *get_top_lgraph() const { return top_g; }
+  Lgraph        *get_class_lgraph() const { return current_g; }
+  Lgraph        *get_lg() const { return current_g; }  // To handle hierarchical API
   Graph_library *ref_library() const;
 
   Index_id        get_nid() const { return nid; }
@@ -323,8 +329,8 @@ public:
   void            set_type_const(const Lconst &val);
   Lg_type_id      get_type_sub() const;
   const Sub_node &get_type_sub_node() const;
-  Sub_node *      ref_type_sub_node() const;
-  Lgraph *        ref_type_sub_lgraph() const;  // Slower than other get_type_sub
+  Sub_node       *ref_type_sub_node() const;
+  Lgraph         *ref_type_sub_lgraph() const;  // Slower than other get_type_sub
   bool            is_type_sub_present() const;
 
   Lconst get_type_const() const;
@@ -381,7 +387,7 @@ public:
 
   void             set_place(const Ann_place &p);
   const Ann_place &get_place() const;
-  Ann_place *      ref_place();
+  Ann_place       *ref_place();
   bool             has_place() const;
 
   Bits_t get_bits() const;
@@ -393,6 +399,8 @@ public:
 
   void dump() const;
 };
+
+using Node_hasher = absl::Hash<Node>;
 
 namespace mmap_lib {
 template <>

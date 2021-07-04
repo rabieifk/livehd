@@ -1,9 +1,9 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "fmt/format.h"
 #include "iassert.hpp"
 #include "lbench.hpp"
@@ -92,7 +92,7 @@ void use_mmap_map(int max) {
 void use_abseil_map(int max) {
   Lbench b("mmap.use_abseil_map_" + std::to_string(max));
 
-  absl::flat_hash_map<uint32_t, uint32_t> map;
+  std::unordered_map<uint32_t, uint32_t> map;
 
   for (int n = 1; n < NITERS; ++n) {
     map.clear();

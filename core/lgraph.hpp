@@ -1,7 +1,8 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
 
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
+
 #include "cell.hpp"
 #include "edge.hpp"
 #include "graph_library.hpp"

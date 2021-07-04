@@ -224,8 +224,8 @@ void Pass_abc::find_sub_conn(const Lgraph *g) {
     if (opack.verbose)
       fmt::print("\nSubGraph_Op NodeID:{} has direct input from Node: \n", idx);
 
-    absl::flat_hash_map<Port_ID, const Edge *>                  inp_edges;
-    absl::flat_hash_map<Port_ID, graph_topology::topology_info> subgraph_pid;
+    std::unordered_map<Port_ID, const Edge *>                  inp_edges;
+    std::unordered_map<Port_ID, graph_topology::topology_info> subgraph_pid;
 
     for (const auto &input : g->inp_edges(idx)) {
       Port_ID inp_id    = input.get_inp_pin().get_pid();
@@ -259,8 +259,8 @@ void Pass_abc::find_memory_conn(const Lgraph *g) {
     if (opack.verbose)
       fmt::print("\nMemory_Op NodeID:{} has direct input from Node: \n", idx);
 
-    absl::flat_hash_map<Port_ID, const Edge *>                  inp_edges;
-    absl::flat_hash_map<Port_ID, graph_topology::topology_info> memory_pid;
+    std::unordered_map<Port_ID, const Edge *>                  inp_edges;
+    std::unordered_map<Port_ID, graph_topology::topology_info> memory_pid;
 
     for (const auto &input : g->inp_edges(idx)) {
       Port_ID inp_id = input.get_inp_pin().get_pid();

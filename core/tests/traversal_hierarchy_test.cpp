@@ -24,10 +24,10 @@ protected:
 
   mmap_lib::tree<Node_data> tree;
   std::vector<Node>         node_order;
-  Lgraph *                  lg_root;
+  Lgraph                   *lg_root;
 
-  absl::flat_hash_map<Node::Compact, uint64_t> absl_fwd_pos;
-  absl::flat_hash_map<Node::Compact, uint64_t> absl_bwd_pos;
+  std::unordered_map<Node::Compact, uint64_t, Node::Compact_hasher> absl_fwd_pos;
+  std::unordered_map<Node::Compact, uint64_t, Node::Compact_hasher> absl_bwd_pos;
 
   static constexpr char fwd_name[] = "fwd_pos";
   static constexpr char bwd_name[] = "bwd_pos";

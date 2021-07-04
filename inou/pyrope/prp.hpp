@@ -2,12 +2,13 @@
 
 #pragma once
 
+#include <list>
 #include <set>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include "absl/hash/hash.h"
 #include "ast.hpp"
 #include "elab_scanner.hpp"
 
@@ -216,9 +217,9 @@ protected:
   uint64_t cur_line        = 0;
   uint64_t cur_pos         = 0;
 
-  std::unique_ptr<Ast_parser>                ast;
-  absl::flat_hash_map<std::string, Token_id> pyrope_keyword;
-  absl::flat_hash_map<Token_id, uint16_t>
+  std::unique_ptr<Ast_parser>               ast;
+  std::unordered_map<std::string, Token_id> pyrope_keyword;
+  std::unordered_map<Token_id, uint16_t, absl::Hash<Token_id>>
                            ws_map;  // two uint8_ts 0 = no whitespace, 1 = whitespace, 2 = whitespace + comments, 3 = line break
   std::vector<std::string> rule_call_stack;
   uint64_t                 term_token = 1;

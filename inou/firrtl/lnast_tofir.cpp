@@ -42,7 +42,7 @@ void Inou_firrtl::do_tofirrtl(std::shared_ptr<Lnast> ln, firrtl::FirrtlPB_Circui
   const auto     stmts    = ln->get_first_child(top);
   const auto     top_name = (std::string)ln->get_name(top);
 
-  firrtl::FirrtlPB_Module *           mod  = circuit->add_module();
+  firrtl::FirrtlPB_Module            *mod  = circuit->add_module();
   firrtl::FirrtlPB_Module_UserModule *umod = new firrtl::FirrtlPB_Module_UserModule();
   umod->set_id(top_name);  // FIXME: Need to make sure top node has module name
   FindCircuitComps(*ln, umod);
@@ -192,8 +192,8 @@ bool Inou_firrtl::process_ln_assign_op(Lnast &ln, const Lnast_nid &lnidx_assign,
   auto ntype_c1 = ln.get_type(c1);
   I(ntype_c1.is_const() || ntype_c1.is_ref());
 
-  if (dot_map.contains(ln.get_name(c0))) {
-    auto field_node = dot_map[ln.get_name(c0)].second;
+  if (dot_map.find(ln.get_name(c0).data()) != dot_map.end()) {
+    auto field_node = dot_map[ln.get_name(c0).data()].second;
     if (ln.get_name(field_node).substr(0, 2) == "__") {
       // This isn't an actual assign, and is instead assigning an attribute.
       handle_attr_assign(ln, c0, c1);
@@ -223,8 +223,8 @@ void Inou_firrtl::process_tup_asg(Lnast &ln, const Lnast_nid &lnidx_asg, const s
   I(ntype_c1.is_const() || ntype_c1.is_ref());
 
   firrtl::FirrtlPB_Expression_SubField *subfield_expr;
-  if (wire_rename_map.contains(lhs)) {
-    auto rename_str = wire_rename_map[lhs];
+  if (wire_rename_map.find(lhs.data()) != wire_rename_map.end()) {
+    auto rename_str = wire_rename_map[lhs.data()];
     subfield_expr   = make_subfield_expr(absl::StrCat(rename_str, ".", ln.get_name(c0)));
   } else {
     subfield_expr = make_subfield_expr(absl::StrCat(lhs, ".", ln.get_name(c0)));
@@ -281,7 +281,7 @@ void Inou_firrtl::process_ln_bit_not_op(Lnast &ln, const Lnast_nid &lnidx_not, f
   I(ntype_c1.is_const() || ntype_c1.is_ref());
 
   // Form expression that holds RHS contents.
-  firrtl::FirrtlPB_Expression *       rhs_expr    = new firrtl::FirrtlPB_Expression();
+  firrtl::FirrtlPB_Expression        *rhs_expr    = new firrtl::FirrtlPB_Expression();
   firrtl::FirrtlPB_Expression_PrimOp *rhs_prim_op = new firrtl::FirrtlPB_Expression_PrimOp();
   rhs_prim_op->set_op(firrtl::FirrtlPB_Expression_PrimOp_Op_OP_BIT_NOT);
 
@@ -301,7 +301,7 @@ void Inou_firrtl::process_ln_reduce_xor_op(Lnast &ln, const Lnast_nid &lnidx_par
   I(ntype_c1.is_const() || ntype_c1.is_ref());
 
   // Form expression that holds RHS contents.
-  firrtl::FirrtlPB_Expression *       rhs_expr    = new firrtl::FirrtlPB_Expression();
+  firrtl::FirrtlPB_Expression        *rhs_expr    = new firrtl::FirrtlPB_Expression();
   firrtl::FirrtlPB_Expression_PrimOp *rhs_prim_op = new firrtl::FirrtlPB_Expression_PrimOp();
   rhs_prim_op->set_op(firrtl::FirrtlPB_Expression_PrimOp_Op_OP_XOR_REDUCE);
 
@@ -323,8 +323,8 @@ void Inou_firrtl::process_ln_nary_op(Lnast &ln, const Lnast_nid &lnidx_op, firrt
   // Grab the LHS for later use. Also create PrimOP for RHS expr.
   Lnast_nid                           lnidx_lhs;
   firrtl::FirrtlPB_Expression_PrimOp *rhs_prim_op      = NULL;
-  firrtl::FirrtlPB_Expression *       rhs_expr         = NULL;
-  firrtl::FirrtlPB_Expression *       rhs_highest_expr = NULL;
+  firrtl::FirrtlPB_Expression        *rhs_expr         = NULL;
+  firrtl::FirrtlPB_Expression        *rhs_highest_expr = NULL;
   for (const auto &lnchild_idx : ln.children(lnidx_op)) {
     if (first) {
       first     = false;
@@ -455,7 +455,7 @@ bool Inou_firrtl::process_ln_select(Lnast &ln, const Lnast_nid &lnidx_dot, firrt
   auto tup   = ln.get_sibling_next(lhs);
   auto field = ln.get_sibling_next(tup);
 
-  dot_map[ln.get_name(lhs)] = {tup, field};
+  dot_map[ln.get_name(lhs).data()] = {tup, field};
 
   if (!(ln.get_name(field).substr(0, 2) == "__")) {
     /* If this is not a dot for an attribute, then create an
@@ -464,8 +464,8 @@ bool Inou_firrtl::process_ln_select(Lnast &ln, const Lnast_nid &lnidx_dot, firrt
     // vecs in the LNAST. If there's a dot, it's either an attribute or accessing
     // an element of a bundle/vec. That element cannot be another bundle/vec.
     auto tup_name = ln.get_name(tup);
-    if (wire_rename_map.contains(tup_name)) {
-      tup_name = wire_rename_map[tup_name];
+    if (wire_rename_map.find(tup_name.data()) != wire_rename_map.end()) {
+      tup_name = wire_rename_map[tup_name.data()];
     }
     auto field_name    = ln.get_name(field);
     auto subfield_expr = make_subfield_expr(absl::StrCat(tup_name, ".", field_name));
@@ -489,7 +489,7 @@ bool Inou_firrtl::process_ln_select(Lnast &ln, const Lnast_nid &lnidx_dot, firrt
 }
 
 void Inou_firrtl::handle_attr_assign(Lnast &ln, const Lnast_nid &lhs, const Lnast_nid &rhs) {
-  auto pair      = dot_map[ln.get_name(lhs)];
+  auto pair      = dot_map[ln.get_name(lhs).data()];
   auto var       = pair.first;
   auto var_name  = ln.get_name(var);
   auto attr      = pair.second;
@@ -527,8 +527,8 @@ void Inou_firrtl::handle_sign_attr(Lnast &ln, const std::string_view &var_name, 
     return;
   }
 
-  if (io_map.contains(var_name.substr(1))) {
-    auto port_ptr = io_map[var_name.substr(1)];
+  if (io_map.find(var_name.substr(1).data()) != io_map.end()) {
+    auto port_ptr = io_map[var_name.substr(1).data()];
     if (port_ptr->type().has_sint_type()) {
       return;
     } else if (port_ptr->type().has_uint_type()) {
@@ -543,9 +543,9 @@ void Inou_firrtl::handle_sign_attr(Lnast &ln, const std::string_view &var_name, 
       // FIXME: Unsure of how to deal with conflicting types.
       I(false);
     }
-  } else if (reg_wire_map.contains(var_name.substr(1))) {
-    I(reg_wire_map[var_name.substr(1)]->has_register_());
-    auto reg_ptr = reg_wire_map[var_name.substr(1)]->mutable_register_();
+  } else if (reg_wire_map.find(var_name.substr(1).data()) != reg_wire_map.end()) {
+    I(reg_wire_map[var_name.substr(1).data()]->has_register_());
+    auto reg_ptr = reg_wire_map[var_name.substr(1).data()]->mutable_register_();
     if (reg_ptr->type().has_sint_type()) {
       return;
     } else if (reg_ptr->type().has_uint_type()) {
@@ -560,9 +560,9 @@ void Inou_firrtl::handle_sign_attr(Lnast &ln, const std::string_view &var_name, 
       // FIXME: Unsure of how to deal with conflicting types.
       I(false);
     }
-  } else if (reg_wire_map.contains(var_name)) {
-    I(reg_wire_map[var_name]->has_wire());
-    auto wire_ptr = reg_wire_map[var_name.substr(1)]->mutable_wire();
+  } else if (reg_wire_map.find(var_name.data()) != reg_wire_map.end()) {
+    I(reg_wire_map[var_name.data()]->has_wire());
+    auto wire_ptr = reg_wire_map[var_name.substr(1).data()]->mutable_wire();
     if (wire_ptr->type().has_sint_type()) {
       return;
     } else if (wire_ptr->type().has_uint_type()) {
@@ -586,8 +586,8 @@ void Inou_firrtl::handle_sign_attr(Lnast &ln, const std::string_view &var_name, 
 }
 
 void Inou_firrtl::handle_clock_attr(Lnast &ln, const std::string_view &var_name, const Lnast_nid &rhs) {
-  I(reg_wire_map.contains(var_name.substr(1)));
-  auto stmt = reg_wire_map[var_name.substr(1)];
+  I(reg_wire_map.find(var_name.substr(1).data()) != reg_wire_map.end());
+  auto stmt = reg_wire_map[var_name.substr(1).data()];
   I(stmt->has_register_());
   auto reg = stmt->mutable_register_();
 
@@ -596,22 +596,22 @@ void Inou_firrtl::handle_clock_attr(Lnast &ln, const std::string_view &var_name,
    * not, then we have to create as asClock expression to convert the intermediate */
   // FIXME: Perhaps I should add checks to make sure changing this to Clock won't break something else.
   auto clk_name = ln.get_name(rhs);
-  if (io_map.contains(clk_name.substr(1))) {
-    auto port_ptr = io_map[clk_name.substr(1)];
+  if (io_map.find(clk_name.substr(1).data()) != io_map.end()) {
+    auto port_ptr = io_map[clk_name.substr(1).data()];
     auto clk_type = new firrtl::FirrtlPB_Type_ClockType();
     auto type     = new firrtl::FirrtlPB_Type();
     type->set_allocated_clock_type(clk_type);
     port_ptr->set_allocated_type(type);
 
-  } else if (reg_wire_map.contains(clk_name.substr(1))) {
-    auto stmt_ptr = reg_wire_map[clk_name.substr(1)];
+  } else if (reg_wire_map.find(clk_name.substr(1).data()) != reg_wire_map.end()) {
+    auto stmt_ptr = reg_wire_map[clk_name.substr(1).data()];
     auto clk_type = new firrtl::FirrtlPB_Type_ClockType();
     auto type     = new firrtl::FirrtlPB_Type();
     type->set_allocated_clock_type(clk_type);
     stmt_ptr->mutable_register_()->set_allocated_type(type);
 
-  } else if (reg_wire_map.contains(clk_name)) {
-    auto stmt_ptr = reg_wire_map[clk_name];
+  } else if (reg_wire_map.find(clk_name.data()) != reg_wire_map.end()) {
+    auto stmt_ptr = reg_wire_map[clk_name.data()];
     auto clk_type = new firrtl::FirrtlPB_Type_ClockType();
     auto type     = new firrtl::FirrtlPB_Type();
     type->set_allocated_clock_type(clk_type);
@@ -646,16 +646,16 @@ void Inou_firrtl::handle_async_attr(Lnast &ln, const std::string_view &var_name,
 
 // (See handle_clock_attr for description)
 void Inou_firrtl::handle_reset_attr(Lnast &ln, const std::string_view &var_name, const Lnast_nid &rhs) {
-  I(reg_wire_map.contains(var_name.substr(1)));
-  auto stmt = reg_wire_map[var_name.substr(1)];
+  I(reg_wire_map.find(var_name.substr(1).data()) != reg_wire_map.end());
+  auto stmt = reg_wire_map[var_name.substr(1).data()];
   I(stmt->has_register_());
   auto reg = stmt->mutable_register_();
 
   auto reset_name = ln.get_name(rhs);
-  if (io_map.contains(reset_name.substr(1))) {
-    auto port_ptr = io_map[reset_name.substr(1)];
+  if (io_map.find(reset_name.substr(1).data()) != io_map.end()) {
+    auto port_ptr = io_map[reset_name.substr(1).data()];
     auto type     = new firrtl::FirrtlPB_Type();
-    if (async_regs.contains(var_name.substr(1))) {
+    if (async_regs.find(var_name.substr(1)) != async_regs.end()) {
       auto areset_type = new firrtl::FirrtlPB_Type_AsyncResetType();
       type->set_allocated_async_reset_type(areset_type);
     } else {
@@ -664,10 +664,10 @@ void Inou_firrtl::handle_reset_attr(Lnast &ln, const std::string_view &var_name,
     }
     port_ptr->set_allocated_type(type);
 
-  } else if (reg_wire_map.contains(reset_name.substr(1))) {
-    auto stmt_ptr = reg_wire_map[reset_name.substr(1)];
+  } else if (reg_wire_map.find(reset_name.substr(1).data()) != reg_wire_map.end()) {
+    auto stmt_ptr = reg_wire_map[reset_name.substr(1).data()];
     auto type     = new firrtl::FirrtlPB_Type();
-    if (async_regs.contains(var_name.substr(1))) {
+    if (async_regs.find(var_name.substr(1)) != async_regs.end()) {
       auto areset_type = new firrtl::FirrtlPB_Type_AsyncResetType();
       type->set_allocated_async_reset_type(areset_type);
     } else {
@@ -676,10 +676,10 @@ void Inou_firrtl::handle_reset_attr(Lnast &ln, const std::string_view &var_name,
     }
     stmt_ptr->mutable_register_()->set_allocated_type(type);
 
-  } else if (reg_wire_map.contains(reset_name)) {
-    auto stmt_ptr = reg_wire_map[reset_name];
+  } else if (reg_wire_map.find(reset_name.data()) != reg_wire_map.end()) {
+    auto stmt_ptr = reg_wire_map[reset_name.data()];
     auto type     = new firrtl::FirrtlPB_Type();
-    if (async_regs.contains(var_name.substr(1))) {
+    if (async_regs.find(var_name.substr(1).data()) != async_regs.end()) {
       auto areset_type = new firrtl::FirrtlPB_Type_AsyncResetType();
       type->set_allocated_async_reset_type(areset_type);
     } else {

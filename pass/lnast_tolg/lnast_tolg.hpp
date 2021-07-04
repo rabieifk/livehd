@@ -25,14 +25,15 @@ private:
   std::string_view         path;
   std::string              tuple_assign_str;
 
-  absl::flat_hash_map<Lnast_ntype::Lnast_ntype_int, Ntype_op> primitive_type_lnast2lg;
-  absl::flat_hash_map<std::string, Node_pin>                  name2dpin;  // for scalar variable
-  absl::flat_hash_set<std::string>                            inlined_func_names; 
-  absl::flat_hash_map<std::string, Node_pin>                  field2dpin;
-  absl::flat_hash_map<std::string_view, std::vector<Node>>    driver_var2wire_nodes;  // for __last_value temporarily wire nodes
-  absl::flat_hash_map<Node_pin, std::vector<Node_pin>>        inp2leaf_tg_spins;
-  absl::flat_hash_map<std::string, Node>                      vname2tuple_head;  // record the tuple_chain head, which will be driven by the #register variable with the largest_ssa
-  absl::flat_hash_map<Node::Compact, absl::flat_hash_set<Node>> inp_artifacts;
+  std::unordered_map<Lnast_ntype::Lnast_ntype_int, Ntype_op> primitive_type_lnast2lg;
+  std::unordered_map<std::string, Node_pin>                  name2dpin;  // for scalar variable
+  std::unordered_set<std::string>                            inlined_func_names;
+  std::unordered_map<std::string, Node_pin>                  field2dpin;
+  std::unordered_map<std::string_view, std::vector<Node>>    driver_var2wire_nodes;  // for __last_value temporarily wire nodes
+  std::unordered_map<Node_pin, std::vector<Node_pin>, Node_pin_hasher> inp2leaf_tg_spins;
+  std::unordered_map<std::string, Node>
+      vname2tuple_head;  // record the tuple_chain head, which will be driven by the #register variable with the largest_ssa
+  std::unordered_map<Node::Compact, std::unordered_set<Node, Node_hasher>, Node::Compact_hasher> inp_artifacts;
 
 protected:
   void top_stmts2lgraph(Lgraph *lg, const Lnast_nid &lnidx_stmts);

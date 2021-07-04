@@ -14,7 +14,7 @@ protected:
   uint64_t seq_count      = 0;
   bool     put_bw_in_ln   = true;
 
-  absl::flat_hash_map<Node_pin::Compact_class_driver, std::string> dpin_name_map;
+  std::unordered_map<Node_pin::Compact_class_driver, std::string, Node_pin::Compact_class_driver_hasher> dpin_name_map;
 
   void do_trans(Lgraph* g, Eprp_var& var, std::string_view module_name);
 

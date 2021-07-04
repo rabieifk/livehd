@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
+
 #include "eprp_var.hpp"
 
 class Eprp_method {
@@ -19,7 +20,7 @@ protected:
   const std::string name;
 
 public:
-  absl::flat_hash_map<std::string, Label_attr> labels;
+  std::unordered_map<std::string, Label_attr> labels;
 
   const std::string &get_name() const { return name; }
 

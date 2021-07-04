@@ -3,7 +3,7 @@
 
 namespace Live {
 
-int resolve_bit(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, absl::flat_hash_set<uint32_t> &bits) {
+int resolve_bit(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, std::unordered_set<uint32_t> &bits) {
   if (graph->node_type_get(idx).op == Pick_Op) {
     I(graph->get_bits(graph->get_node(idx).get_driver_pin()) >= current_bit);
     if (pin != 0)
@@ -131,7 +131,7 @@ int resolve_bit(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, 
 
 // resolves which bits are dependencies of the current bit based on node type
 // when propagating backwards
-int resolve_bit_fwd(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, absl::flat_hash_set<uint32_t> &bits) {
+int resolve_bit_fwd(Lgraph *graph, Index_id idx, uint32_t current_bit, Port_ID pin, std::unordered_set<uint32_t> &bits) {
   if (graph->node_type_get(idx).op == Pick_Op) {
     if (pin != 0)
       return -1;  // do not propagate through this pid

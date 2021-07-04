@@ -23,8 +23,8 @@ FPContainer* Node_hier_floorp::load_lg_nodes(const mmap_lib::map<Node::Compact, 
   const std::string_view path = root_lg->get_path();
 
   // count instances of leaves and subnodes for later use
-  absl::flat_hash_map<Lgraph*, unsigned int>  sub_lg_count;
-  absl::flat_hash_map<Ntype_op, unsigned int> grid_count;
+  std::unordered_map<Lgraph*, unsigned int>  sub_lg_count;
+  std::unordered_map<Ntype_op, unsigned int> grid_count;
   for (auto child_idx : nt.children(tidx)) {
     const Node& child = nt.get_data(child_idx);
     if (child.is_type_sub_present()) {
@@ -35,7 +35,7 @@ FPContainer* Node_hier_floorp::load_lg_nodes(const mmap_lib::map<Node::Compact, 
     }
   }
 
-  absl::flat_hash_set<Ntype_op> skip;
+  std::unordered_set<Ntype_op> skip;
   for (auto child_idx : nt.children(tidx)) {
     const Node& child = nt.get_data(child_idx);
 
@@ -68,7 +68,7 @@ FPContainer* Node_hier_floorp::load_lg_nodes(const mmap_lib::map<Node::Compact, 
 
     } else {  // if (child.is_type_synth()) {
       Ntype_op op = child.get_type_op();
-      if (skip.contains(op)) {
+      if (skip.find(op) != skip.end()) {
         continue;
       }
 

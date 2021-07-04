@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include <unordered_map>
+#include <unordered_set>
+
 #include "lgedgeiter.hpp"
 #include "lgraph.hpp"
 #include "lgraphbase.hpp"
@@ -18,9 +19,9 @@ private:
   int last_free_id;
   int collapse_set_min;
 
-  absl::flat_hash_set<int>                     collapse_set;
-  absl::flat_hash_map<Node::Compact_flat, int> flat_node2id;
-  absl::flat_hash_map<int, int>                flat_merges;
+  std::unordered_set<int>                     collapse_set;
+  std::unordered_map<Node::Compact_flat, int, Node::Compact_flat_hasher> flat_node2id;
+  std::unordered_map<int, int>                flat_merges;
 
   int  get_free_id();
   void set_id(const Node &node, int id);

@@ -2,6 +2,7 @@
 
 #include "hierarchy.hpp"
 
+#include "absl/strings/str_cat.h"
 #include "annotate.hpp"
 #include "lgraph.hpp"
 #include "node.hpp"

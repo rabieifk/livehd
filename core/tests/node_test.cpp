@@ -1,9 +1,9 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "annotate.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -18,7 +18,7 @@ protected:
   Lgraph *c1  = 0;
   Lgraph *c2  = 0;
 
-  absl::flat_hash_map<std::string, int> children;
+  std::unordered_map<std::string, int> children;
 
   std::vector<Lgraph *> lgs;
 
@@ -187,7 +187,7 @@ TEST_F(Setup_graphs_test, annotated) {
 }
 
 TEST_F(Setup_graphs_test, annotate2) {
-  absl::flat_hash_map<Node_pin::Compact_class, int> my_map2;
+  std::unordered_map<Node_pin::Compact_class, int, Node_pin::Compact_class_hasher> my_map2;
 
   int total = 0;
   for (const auto &node : top->forward()) {
@@ -210,7 +210,7 @@ TEST_F(Setup_graphs_test, annotate2) {
 }
 
 TEST_F(Setup_graphs_test, annotate2_hier) {
-  absl::flat_hash_map<Node_pin::Compact, int> my_map2;
+  std::unordered_map<Node_pin::Compact, int, Node_pin::Compact_hasher> my_map2;
 
   int total = 0;
   for (const auto &node : top->forward(true)) {

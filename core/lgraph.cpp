@@ -39,7 +39,7 @@ Lgraph *Lgraph::create(std::string_view path, std::string_view name, std::string
 Lgraph *Lgraph::clone_skeleton(std::string_view new_lg_name) {
   std::string lg_source{get_library().get_source(get_lgid())};  // string, create can free it
   auto        lg_name = absl::StrCat(new_lg_name);
-  Lgraph *    new_lg  = Lgraph::create(get_path(), lg_name, lg_source);
+  Lgraph     *new_lg  = Lgraph::create(get_path(), lg_name, lg_source);
 
   auto *new_sub = new_lg->ref_self_sub_node();
   new_sub->reset_pins();  // NOTE: it may have been created before. Clear to keep same order/attributes
@@ -228,15 +228,15 @@ Node_pin Lgraph::add_graph_output(std::string_view str_sv, Port_ID pos, uint32_t
 Node_pin_iterator Lgraph::out_connected_pins(const Node &node) const {
   I(node.get_class_lgraph() == this);
 
-  Node_pin_iterator            xiter;
-  absl::flat_hash_set<Port_ID> xiter_set;
+  Node_pin_iterator           xiter;
+  std::unordered_set<Port_ID> xiter_set;
 
   Index_id idx2 = node.get_nid();
   I(node_internal[idx2].is_master_root());
 
   auto pid = node_internal[idx2].get_dst_pid();
   while (true) {
-    I(!xiter_set.contains(pid));
+    I(xiter_set.find(pid) == xiter_set.end());
     auto n = node_internal[idx2].get_num_local_outputs();
     if (n > 0) {
       auto root_idx = idx2;
@@ -256,7 +256,7 @@ Node_pin_iterator Lgraph::out_connected_pins(const Node &node) const {
       I(node_internal[tmp].get_master_root_nid() == node_internal[idx2].get_master_root_nid());
       idx2 = tmp;
       pid  = node_internal[idx2].get_dst_pid();
-    } while (xiter_set.contains(pid));
+    } while (xiter_set.find(pid) != xiter_set.end());
   }
 
   return xiter;
@@ -264,15 +264,15 @@ Node_pin_iterator Lgraph::out_connected_pins(const Node &node) const {
 
 Node_pin_iterator Lgraph::inp_connected_pins(const Node &node) const {
   I(node.get_class_lgraph() == this);
-  Node_pin_iterator            xiter;
-  absl::flat_hash_set<Port_ID> xiter_set;
+  Node_pin_iterator           xiter;
+  std::unordered_set<Port_ID> xiter_set;
 
   Index_id idx2 = node.get_nid();
   I(node_internal[idx2].is_master_root());
 
   auto pid = node_internal[idx2].get_dst_pid();
   while (true) {
-    I(!xiter_set.contains(pid));
+    I(xiter_set.find(pid) == xiter_set.end());
     auto n = node_internal[idx2].get_num_local_inputs();
     if (n > 0) {
       auto root_idx = idx2;
@@ -291,7 +291,7 @@ Node_pin_iterator Lgraph::inp_connected_pins(const Node &node) const {
       I(node_internal[tmp].get_master_root_nid() == node_internal[idx2].get_master_root_nid());
       idx2 = tmp;
       pid  = node_internal[idx2].get_dst_pid();
-    } while (xiter_set.contains(pid));
+    } while (xiter_set.find(pid) != xiter_set.end());
   }
 
   return xiter;
@@ -895,7 +895,7 @@ void Lgraph::del_sink2node_int(const Node &driver, Node &sink) {
   I(sink.get_class_lgraph() == driver.get_top_lgraph());
 
   Index_id idx2         = sink.get_nid();
-  auto *   node_int_ptr = node_internal.ref(idx2);
+  auto    *node_int_ptr = node_internal.ref(idx2);
   node_int_ptr->clear_full_hint();
 
   Index_id last_idx = idx2;
@@ -961,7 +961,7 @@ bool Lgraph::del_edge_driver_int(const Node_pin &dpin, const Node_pin &spin) {
   node_internal.ref(dpin.get_root_idx())->clear_full_hint();
 
   Index_id idx2         = dpin.get_idx();
-  auto *   node_int_ptr = node_internal.ref(idx2);
+  auto    *node_int_ptr = node_internal.ref(idx2);
 
   Index_id last_idx = idx2;
 
@@ -1018,7 +1018,7 @@ bool Lgraph::del_edge_sink_int(const Node_pin &dpin, const Node_pin &spin) {
   GI(!dpin.is_invalid(), spin.get_class_lgraph() == dpin.get_top_lgraph());
 
   Index_id idx2         = spin.get_idx();
-  auto *   node_int_ptr = node_internal.ref(idx2);
+  auto    *node_int_ptr = node_internal.ref(idx2);
   node_internal.ref(spin.get_root_idx())->clear_full_hint();
 
   Index_id dpin_root_idx = 0;

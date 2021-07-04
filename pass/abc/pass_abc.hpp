@@ -5,8 +5,9 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
+#include "absl/hash/hash.h"
 #include "lgedgeiter.hpp"
 #include "lgraphbase.hpp"
 #include "options.hpp"
@@ -131,21 +132,21 @@ public:
 
   struct graph_topology {
     using topology_info = std::vector<index_offset>;
-    using name2id       = absl::flat_hash_map<std::string, uint64_t>;
-    using cell_group    = absl::flat_hash_map<uint64_t, Abc_comb, IndexID_Hash>;
-    using latch_group   = absl::flat_hash_map<uint64_t, Abc_latch, IndexID_Hash>;
-    using skew_group    = absl::flat_hash_map<std::string, std::set<uint64_t>>;
-    using reset_group   = absl::flat_hash_map<std::string, std::set<uint64_t>>;
-    using node_conn     = absl::flat_hash_map<uint64_t, topology_info, IndexID_Hash>;
-    using block_conn    = absl::flat_hash_map<uint64_t, absl::flat_hash_map<Port_ID, topology_info>, IndexID_Hash>;
-    using idremap       = absl::flat_hash_map<uint64_t, uint64_t>;
-    using pidremap      = absl::flat_hash_map<uint64_t, absl::flat_hash_map<Port_ID, uint64_t>>;
-    using ptr2id        = absl::flat_hash_map<Abc_Obj_t *, uint64_t>;
-    using id2pid        = absl::flat_hash_map<uint64_t, Port_ID, IndexID_Hash>;
+    using name2id       = std::unordered_map<std::string, uint64_t>;
+    using cell_group    = std::unordered_map<uint64_t, Abc_comb, IndexID_Hash>;
+    using latch_group   = std::unordered_map<uint64_t, Abc_latch, IndexID_Hash>;
+    using skew_group    = std::unordered_map<std::string, std::set<uint64_t>>;
+    using reset_group   = std::unordered_map<std::string, std::set<uint64_t>>;
+    using node_conn     = std::unordered_map<uint64_t, topology_info, IndexID_Hash>;
+    using block_conn    = std::unordered_map<uint64_t, std::unordered_map<Port_ID, topology_info>, IndexID_Hash>;
+    using idremap       = std::unordered_map<uint64_t, uint64_t>;
+    using pidremap      = std::unordered_map<uint64_t, std::unordered_map<Port_ID, uint64_t>>;
+    using ptr2id        = std::unordered_map<Abc_Obj_t *, uint64_t>;
+    using id2pid        = std::unordered_map<uint64_t, Port_ID, IndexID_Hash>;
     using value_size    = std::pair<uint32_t, uint32_t>;
-    using record        = absl::flat_hash_map<std::string, Abc_Obj_t *>;
+    using record        = std::unordered_map<std::string, Abc_Obj_t *>;
 
-    using picks2pin   = absl::flat_hash_map<Pick_ID, Node_pin>;
+    using picks2pin   = std::unordered_map<Pick_ID, Node_pin, absl::Hash<Pick_ID>>;
     using po_group    = std::map<index_offset, Abc_primary_output>;
     using pi_group    = std::map<index_offset, Abc_primary_input>;
     using pseduo_name = std::map<index_offset, std::string>;

@@ -4,7 +4,9 @@
 
 #include <unistd.h>
 
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
+
+#include "absl/hash/hash.h"
 #include "fmt/format.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -25,7 +27,7 @@ TEST_F(Setup_mmap_map_test, string_data) {
   while (!zero_found) {
     mmap_lib::map<uint32_t, std::string_view> map;
     map.clear();
-    absl::flat_hash_map<uint32_t, std::string> map2;
+    std::unordered_map<uint32_t, std::string> map2;
 
     int conta = 0;
     for (int i = 0; i < 10000; i++) {
@@ -74,7 +76,7 @@ TEST_F(Setup_mmap_map_test, string_data) {
 TEST_F(Setup_mmap_map_test, string_data_persistance) {
   Lrand<int> rng;
 
-  absl::flat_hash_map<uint32_t, std::string> map2;
+  std::unordered_map<uint32_t, std::string> map2;
 
   unlink("lgdb_bench/mmap_map_test_sview_data");
   EXPECT_EQ(access("lgdb_bench/mmap_map_test_sview_data", F_OK), -1);
@@ -174,7 +176,7 @@ TEST_F(Setup_mmap_map_test, string_key) {
   for (int n = 0; n < 4; ++n) {
     mmap_lib::map<std::string_view, uint32_t> map;
     map.clear();
-    absl::flat_hash_map<std::string, uint32_t> map2;
+    std::unordered_map<std::string, uint32_t> map2;
 
     int conta = 0;
     for (int i = 0; i < 10000; i++) {
@@ -183,7 +185,7 @@ TEST_F(Setup_mmap_map_test, string_key) {
       std::string_view key{sz_str};
 
       if (map.has(key)) {
-        EXPECT_EQ(map2.count(key), 1);
+        EXPECT_EQ(map2.count(key.data()), 1);
         continue;
       }
 
@@ -193,15 +195,15 @@ TEST_F(Setup_mmap_map_test, string_key) {
       map.set(key, sz);
       EXPECT_TRUE(map.has(key));
 
-      EXPECT_EQ(map2.count(key), 0);
-      map2[key] = sz;
-      EXPECT_EQ(map2.count(key), 1);
+      EXPECT_EQ(map2.count(key.data()), 0);
+      map2[key.data()] = sz;
+      EXPECT_EQ(map2.count(key.data()), 1);
     }
 
     for (const auto &it : map) {
       (void)it;
       EXPECT_EQ(map.get_key(it), "base" + std::to_string(it.second) + "foo");
-      EXPECT_EQ(map2.count(map.get_key(it)), 1);
+      EXPECT_EQ(map2.count(map.get_key(it).data()), 1);
       conta--;
     }
     for (const auto &it : map2) {
@@ -224,7 +226,7 @@ TEST_F(Setup_mmap_map_test, string_key_persistance) {
     close(fd);
   }
 
-  absl::flat_hash_map<std::string, uint32_t> map2;
+  std::unordered_map<std::string, uint32_t> map2;
 
   int conta;
   {
@@ -238,7 +240,7 @@ TEST_F(Setup_mmap_map_test, string_key_persistance) {
       std::string_view key{sz_str};
 
       if (map.has(key)) {
-        EXPECT_EQ(map2.count(key), 1);
+        EXPECT_EQ(map2.count(key.data()), 1);
         continue;
       }
 
@@ -248,9 +250,9 @@ TEST_F(Setup_mmap_map_test, string_key_persistance) {
       map.set(key, sz);
       EXPECT_TRUE(map.has(key));
 
-      EXPECT_EQ(map2.count(key), 0);
-      map2[key] = sz;
-      EXPECT_EQ(map2.count(key), 1);
+      EXPECT_EQ(map2.count(key.data()), 0);
+      map2[key.data()] = sz;
+      EXPECT_EQ(map2.count(key.data()), 1);
     }
   }
 
@@ -260,7 +262,7 @@ TEST_F(Setup_mmap_map_test, string_key_persistance) {
     for (const auto &it : map) {
       (void)it;
       EXPECT_EQ(map.get_key(it), std::to_string(it.second) + "foo");
-      EXPECT_EQ(map2.count(map.get_key(it)), 1);
+      EXPECT_EQ(map2.count(map.get_key(it).data()), 1);
       conta--;
     }
     for (const auto &it : map2) {
@@ -317,9 +319,9 @@ public:
 TEST_F(Setup_mmap_map_test, big_entry) {
   Lrand<int> rng;
 
-  mmap_lib::map<uint32_t, Big_entry>       map("lgdb_bench", "mmap_map_test_se");
-  absl::flat_hash_map<uint32_t, Big_entry> map2;
-  auto                                     cap = map.capacity();
+  mmap_lib::map<uint32_t, Big_entry>                             map("lgdb_bench", "mmap_map_test_se");
+  std::unordered_map<uint32_t, Big_entry, absl::Hash<Big_entry>> map2;
+  auto                                                           cap = map.capacity();
 
   for (auto n = 0; n < 1000; n++) {
     map.clear();
@@ -420,7 +422,7 @@ TEST_F(Setup_mmap_map_test, big_key) {
 
   mmap_lib::map<Big_entry, uint32_t> map("lgdb_bench", "mmap_map_test_be");
   map.clear();  // Remove data from previous runs
-  absl::flat_hash_map<Big_entry, uint32_t> map2;
+  std::unordered_map<Big_entry, uint32_t, absl::Hash<Big_entry>> map2;
 
   int conta = 0;
   for (int i = 0; i < 10000; i++) {

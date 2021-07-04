@@ -64,20 +64,21 @@ protected:
   static void work(Eprp_var &var);
 
   std::vector<XEdge> bdinp_edges, bdout_edges;  // boundary_input/output_edges
-  // absl::flat_hash_set<XEdge> bdinp_edges, bdout_edges;//boundary_input/output_edges
-  absl::flat_hash_map<Node::Compact, unsigned int>            node2gid;  // gid == group id, nodes in node2gid should be lutified
-  absl::flat_hash_map<unsigned int, mockturtle_network>       gid2mt;
-  absl::flat_hash_map<unsigned int, mockturtle::klut_network> gid2klut;
-  absl::flat_hash_map<XEdge, Ntk_sigs<mockturtle_network::signal>>
+  // std::unordered_set<XEdge> bdinp_edges, bdout_edges;//boundary_input/output_edges
+  std::unordered_map<Node::Compact, unsigned int, Node::Compact_hasher>
+                                                             node2gid;  // gid == group id, nodes in node2gid should be lutified
+  std::unordered_map<unsigned int, mockturtle_network>       gid2mt;
+  std::unordered_map<unsigned int, mockturtle::klut_network> gid2klut;
+  std::unordered_map<XEdge, Ntk_sigs<mockturtle_network::signal>>
       edge2mt_sigs;  // lg<->mig, including all boundary i/o and "internal" wires
-  absl::flat_hash_map<XEdge, Ntk_sigs<mockturtle::klut_network::signal>>
+  std::unordered_map<XEdge, Ntk_sigs<mockturtle::klut_network::signal>>
       edge2klut_inp_sigs;  // lg<->klut, search edge2mt_sigs table, only input mapping
-  absl::flat_hash_map<XEdge, Ntk_sigs<mockturtle::klut_network::signal>>
+  std::unordered_map<XEdge, Ntk_sigs<mockturtle::klut_network::signal>>
       edge2klut_out_sigs;  // lg<->klut, search edge2mt_sigs table, only output mapping
-  absl::flat_hash_map<Node::Compact, Node::Compact>                                           old_node_to_new_node;
-  absl::flat_hash_map<std::pair<unsigned int, mockturtle::klut_network::node>, Node::Compact> gid_klut_node2lg_node;
-  absl::flat_hash_map<std::pair<unsigned int, mockturtle::klut_network::signal>,
-                      std::vector<std::pair<mockturtle::klut_network::node, Port_ID>>>
+  std::unordered_map<Node::Compact, Node::Compact, Node::Compact_hasher>                     old_node_to_new_node;
+  std::unordered_map<std::pair<unsigned int, mockturtle::klut_network::node>, Node::Compact> gid_klut_node2lg_node;
+  std::unordered_map<std::pair<unsigned int, mockturtle::klut_network::signal>,
+                     std::vector<std::pair<mockturtle::klut_network::node, Port_ID>>>
        gid_pi2sink_node_lg_pid;
   bool lg_partition(Lgraph *);
   void create_mockturtle_network(Lgraph *);

@@ -245,7 +245,7 @@ void Fwd_edge_iterator::Fwd_iter::fwd_get_from_pending(Lgraph *top) {
 
         if (!dpin_list.empty()) {         // Something got added, track potential combinational loops
           for (auto &dpin : dpin_list) {  // fwd
-            if (unvisited.contains(dpin.get_node().get_compact()))
+            if (unvisited.find(dpin.get_node().get_compact()) != unvisited.end())
               topo_add_chain_fwd(dpin);
           }
 
@@ -291,7 +291,7 @@ void Fwd_edge_iterator::Fwd_iter::fwd_get_from_pending(Lgraph *top) {
       I(!(*global_it).is_type_flop());
       pending_stack.push_back(*global_it);
       for (auto &dpin : (*global_it).inp_drivers()) {  // fwd
-        if (unvisited.contains(dpin.get_node().get_compact()))
+        if (unvisited.find(dpin.get_node().get_compact()) != unvisited.end())
           topo_add_chain_fwd(dpin);
       }
     }

@@ -4,10 +4,10 @@
 
 #include <memory>
 #include <string_view>
+#include <unordered_map>
 
 #include "AnnLayout.hpp"
 #include "GeogLayout.hpp"
-#include "absl/container/flat_hash_map.h"
 #include "lgraph.hpp"
 #include "mmap_map.hpp"
 #include "node_tree.hpp"
@@ -83,7 +83,7 @@ protected:
   FPContainer* root_layout;
 
   // at what number of nodes of a given type should they be laid out in a grid?
-  absl::flat_hash_map<Ntype_op, unsigned int> grid_thresh;
+  std::unordered_map<Ntype_op, unsigned int> grid_thresh;
 
   // print debug information
   constexpr static bool debug_print = false;

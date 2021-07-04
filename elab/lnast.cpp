@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "absl/strings/str_cat.h"
 #include "elab_scanner.hpp"
 #include "lbench.hpp"
 #include "mmap_vector.hpp"
@@ -360,7 +361,7 @@ void Lnast::trans_tuple_opr_handle_a_statement(const Lnast_nid &psts_nid, const 
 }
 
 void Lnast::sel2local_tuple_chain(const Lnast_nid &psts_nid, Lnast_nid &selc_nid) {
-  auto &      selc_lrhs_table = selc_lrhs_tables[psts_nid];
+  auto       &selc_lrhs_table = selc_lrhs_tables[psts_nid];
   auto        paired_nid      = selc_lrhs_table[selc_nid].second;
   Lnast_ntype paired_type;
   if (!paired_nid.is_invalid())
@@ -873,7 +874,7 @@ bool Lnast::is_special_case_of_sel_rhs(const Lnast_nid &psts_nid, const Lnast_ni
 void Lnast::ssa_rhs_handle_a_operand_special(const Lnast_nid &gpsts_nid, const Lnast_nid &opd_nid) {
   // note: immediate struct self assignment: A.foo = A[2], which will leads to consecutive sel and sel,
   //       the sel should follow the subscript before the sel increments it.
-  auto &     ssa_rhs_cnt_table = ssa_rhs_cnt_tables[gpsts_nid];
+  auto      &ssa_rhs_cnt_table = ssa_rhs_cnt_tables[gpsts_nid];
   auto       opd_name          = get_name(opd_nid);
   const auto opd_type          = get_type(opd_nid);
   auto       ori_token         = get_token(opd_nid);
@@ -885,7 +886,7 @@ void Lnast::ssa_rhs_handle_a_operand_special(const Lnast_nid &gpsts_nid, const L
 }
 
 void Lnast::ssa_rhs_handle_a_operand(const Lnast_nid &gpsts_nid, const Lnast_nid &opd_nid) {
-  auto &     ssa_rhs_cnt_table = ssa_rhs_cnt_tables[gpsts_nid];
+  auto      &ssa_rhs_cnt_table = ssa_rhs_cnt_tables[gpsts_nid];
   auto       opd_name          = get_name(opd_nid);
   const auto opd_type          = get_type(opd_nid);
   if (opd_type.is_invalid())
@@ -1134,13 +1135,13 @@ void Lnast::update_global_lhs_ssa_cnt_table(const Lnast_nid &lhs_nid) {
 // note: the subs of the lhs of the operator has already handled clearly in first round ssa process, just copy into the
 // rhs_ssa_cnt_table fine.
 void Lnast::update_rhs_ssa_cnt_table(const Lnast_nid &psts_nid, const Lnast_nid &target_key) {
-  auto &     ssa_rhs_cnt_table   = ssa_rhs_cnt_tables[psts_nid];
+  auto      &ssa_rhs_cnt_table   = ssa_rhs_cnt_tables[psts_nid];
   const auto target_name         = get_name(target_key);
   ssa_rhs_cnt_table[target_name] = ref_data(target_key)->subs;
 }
 
 int8_t Lnast::check_rhs_cnt_table_parents_chain(const Lnast_nid &psts_nid, const Lnast_nid &target_key) {
-  auto &     ssa_rhs_cnt_table = ssa_rhs_cnt_tables[psts_nid];
+  auto      &ssa_rhs_cnt_table = ssa_rhs_cnt_tables[psts_nid];
   const auto target_name       = get_name(target_key);
   auto       itr               = ssa_rhs_cnt_table.find(target_name);
 
@@ -1158,12 +1159,14 @@ int8_t Lnast::check_rhs_cnt_table_parents_chain(const Lnast_nid &psts_nid, const
 }
 
 void Lnast::update_phi_resolve_table(const Lnast_nid &psts_nid, const Lnast_nid &lhs_nid) {
-  auto &      phi_resolve_table = phi_resolve_tables[psts_nid];
+  auto       &phi_resolve_table = phi_resolve_tables[psts_nid];
   const auto &lhs_name          = get_name(lhs_nid);
   phi_resolve_table[lhs_name]   = lhs_nid;  // for a variable string, always update to latest Lnast_nid
 }
 
-bool Lnast::is_in_bw_table(const std::string_view name) { return from_lgraph_bw_table.contains((std::string)name); }
+bool Lnast::is_in_bw_table(const std::string_view name) {
+  return from_lgraph_bw_table.find((std::string)name) != from_lgraph_bw_table.end();
+}
 
 uint32_t Lnast::get_bitwidth(const std::string_view name) {
   I(is_in_bw_table(name));

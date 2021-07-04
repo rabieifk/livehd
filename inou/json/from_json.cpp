@@ -3,7 +3,7 @@
 #include "inou_json.hpp"
 #include "lgraph.hpp"
 
-static absl::flat_hash_map<int, Node::Compact_class> json_remap;
+static std::unordered_map<int, Node::Compact_class> json_remap;
 
 void from_json(Lgraph *g, rapidjson::Document &document) {
   json_remap.clear();

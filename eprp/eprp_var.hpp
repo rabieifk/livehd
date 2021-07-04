@@ -7,9 +7,9 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "lnast.hpp"
 
 struct eprp_casecmp_str : public std::binary_function<const std::string, const std::string, bool> {
@@ -20,7 +20,7 @@ class Lgraph;
 
 class Eprp_var {
 public:
-  using Eprp_dict   = absl::flat_hash_map<const std::string, std::string>;
+  using Eprp_dict   = std::unordered_map<std::string, std::string>;
   using Eprp_lgs    = std::vector<Lgraph *>;
   using Eprp_lnasts = std::vector<std::shared_ptr<Lnast> >;
 

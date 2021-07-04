@@ -6,8 +6,8 @@
 #include <charconv>
 #include <cstdint>
 #include <string_view>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
 #include "lbench.hpp"
 
 enum class Ntype_op : uint8_t {
@@ -69,7 +69,7 @@ protected:
       "sext",    "lt",    "gt",   "eq",    "shl",     "sra",     "lut",      "mux",      "io",          "memory",      "flop",
       "latch",   "fflop", "sub",  "const", "tup_add", "tup_get", "attr_set", "attr_get", "compile_err", "last_invalid"};
 
-  inline static absl::flat_hash_map<std::string, Ntype_op> cell_name_map;
+  inline static std::unordered_map<std::string, Ntype_op> cell_name_map;
 
   class _init {
   public:
@@ -81,7 +81,7 @@ protected:
   inline static std::array<std::array<char, static_cast<std::size_t>(Ntype_op::Last_invalid)>, 256>            sink_name2pid;
   inline static std::array<std::array<std::string_view, static_cast<std::size_t>(Ntype_op::Last_invalid)>, 11> sink_pid2name;
   inline static std::array<bool, static_cast<std::size_t>(Ntype_op::Last_invalid)>                             ntype2single_input;
-  inline static absl::flat_hash_map<std::string, int>                                                          name2pid;
+  inline static std::unordered_map<std::string, int>                                                          name2pid;
 
   static constexpr std::string_view get_sink_name_slow(Ntype_op op, int pid);
 
@@ -196,7 +196,7 @@ public:
   static std::string_view get_name(Ntype_op op) { return cell_name[static_cast<size_t>(op)]; }
 
   static Ntype_op get_op(std::string_view name) {
-    const auto it = cell_name_map.find(name);
+    const auto it = cell_name_map.find(name.data());
     if (it == cell_name_map.end())
       return Ntype_op::Invalid;
     return it->second;

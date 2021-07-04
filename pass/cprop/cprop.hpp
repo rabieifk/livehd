@@ -20,13 +20,14 @@ private:
   void connect_reset_pin_if_needed(Node &node);
 
 protected:
-  absl::flat_hash_map<Node::Compact, std::shared_ptr<Lgtuple const>> node2tuple;  // node to the most up-to-dated tuple chain
-  absl::flat_hash_map<std::string_view, Node_pin>                    oname2dpin;
-  absl::flat_hash_map<std::string, Node_pin>                         reg_name2qpin;
-  absl::flat_hash_map<std::string, std::pair<std::string, Node_pin>> reg_attr_map;
-  absl::flat_hash_map<std::string, std::vector<Node_pin>>            reg_name2sink_pins;
-  absl::flat_hash_set<Node::Compact>                                 dont_touch;
-  absl::flat_hash_set<Node::Compact>                                 tuple_done;
+  std::unordered_map<Node::Compact, std::shared_ptr<Lgtuple const>, Node::Compact_hasher>
+                                                                    node2tuple;  // node to the most up-to-dated tuple chain
+  std::unordered_map<std::string_view, Node_pin>                    oname2dpin;
+  std::unordered_map<std::string, Node_pin>                         reg_name2qpin;
+  std::unordered_map<std::string, std::pair<std::string, Node_pin>> reg_attr_map;
+  std::unordered_map<std::string, std::vector<Node_pin>>            reg_name2sink_pins;
+  std::unordered_set<Node::Compact, Node::Compact_hasher>           dont_touch;
+  std::unordered_set<Node::Compact, Node::Compact_hasher>           tuple_done;
 
   std::tuple<Node_pin, std::shared_ptr<Lgtuple const>> get_value(const Node &node) const;
 

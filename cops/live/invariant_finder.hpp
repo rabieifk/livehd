@@ -1,7 +1,8 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
 
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
+
 #include "bm.h"
 #include "invariant.hpp"
 #include "invariant_options.hpp"
@@ -17,14 +18,14 @@ private:
   bm::bvector<> stack;
 
   typedef std::pair<Index_id, uint32_t>   Node_bit;
-  absl::flat_hash_map<Node_bit, Gate_set> partial_cone_cells;  // partial_gate_count
-  absl::flat_hash_map<Node_bit, Net_set>  partial_endpoints;   // sips
+  std::unordered_map<Node_bit, Gate_set> partial_cone_cells;  // partial_gate_count
+  std::unordered_map<Node_bit, Net_set>  partial_endpoints;   // sips
 
   // there is a delay between allocation of the cache and populating it
-  absl::flat_hash_set<Node_bit> cached;
+  std::unordered_set<Node_bit> cached;
 
 #ifndef NDEBUG
-  absl::flat_hash_set<Node_bit> deleted;
+  std::unordered_set<Node_bit> deleted;
 #endif
 
   void get_topology();

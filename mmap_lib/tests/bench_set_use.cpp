@@ -4,11 +4,11 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 //#include "bm.h"
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
 #include "flat_hash_map.hpp"
 #include "lbench.hpp"
 #include "lrand.hpp"
@@ -273,9 +273,9 @@ void random_abseil_set(int max) {
   Lbench b("mmap.random_abseil_set_" + std::to_string(max));
 
 #ifdef ABSEIL_USE_MAP
-  absl::flat_hash_map<uint32_t, bool> map;
+  std::unordered_map<uint32_t, bool> map;
 #else
-  absl::flat_hash_set<uint32_t> map;
+  std::unordered_set<uint32_t> map;
 #endif
 
   for (int n = 1; n < BENCH_OUT_SIZE; ++n) {

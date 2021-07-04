@@ -136,7 +136,7 @@ void Pass_sample::compute_histogram(Lgraph *g) {
 void Pass_sample::compute_max_depth(Lgraph *g) {
   Lbench b("pass.SAMPLE_max_depth");
 
-  absl::flat_hash_map<Node::Compact, int> depth;
+  std::unordered_map<Node::Compact, int, Node::Compact_hasher> depth;
 
   int max_depth = 0;
   for (const auto &node : g->forward()) {

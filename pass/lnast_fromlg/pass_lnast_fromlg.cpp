@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/hash/hash.h"
 #include "lbench.hpp"
 #include "lgedgeiter.hpp"
 
@@ -293,12 +294,12 @@ void Pass_lnast_fromlg::handle_io(Lgraph* lg, Lnast_nid& parent_lnast_node, Lnas
    *   /    |     \
    *  $x   __ubits 7    (note that the $ would be % if it was an output)*/
 
-  auto                                  inp_io_node = lg->get_graph_input_node();
-  absl::flat_hash_set<std::string_view> inps_visited;
+  auto                                 inp_io_node = lg->get_graph_input_node();
+  std::unordered_set<std::string_view> inps_visited;
   for (const auto& edge : inp_io_node.out_edges()) {
     I(edge.driver.has_name());
     auto pin_name = edge.driver.get_name();
-    if (inps_visited.contains(pin_name)) {
+    if (inps_visited.find(pin_name) != inps_visited.end()) {
       continue;
     }
     inps_visited.insert(pin_name);
@@ -473,7 +474,7 @@ void Pass_lnast_fromlg::attach_binary_reduc(Lnast& lnast, Lnast_nid& parent_node
     only_one_pin = true;
 
   } else {
-    absl::flat_hash_set<std::string_view> interm_names;
+    std::unordered_set<std::string_view> interm_names;
     while (dpins.size() > 1) {
       bits_to_shift -= dpins.front().get_bits();
       auto interm_name = create_temp_var(lnast);
@@ -1055,7 +1056,8 @@ void Pass_lnast_fromlg::attach_memory_node(Lnast& lnast, Lnast_nid& parent_node,
       {addr_q.size(), clk_q.size(), din_q.size(), fwd_q.size(), lat_q.size(), wmask_q.size(), pose_q.size(), wmode_q.size()});
 
   // Create a tuple for each memory port.
-  absl::flat_hash_set<std::pair<std::string_view, std::string_view>> port_temp_name_list;
+  std::unordered_set<std::pair<std::string_view, std::string_view>, absl::Hash<std::pair<std::string_view, std::string_view>>>
+      port_temp_name_list;
   for (uint64_t i = 0; i < port_count; i++) {
     /* FIXME: This tuple having the name "memory[1/2/3]" is important to the LN->FIR interface,
      * specifically to help with identifying things related to memory. This is hacky... */

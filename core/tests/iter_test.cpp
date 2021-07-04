@@ -15,9 +15,9 @@ bool failed = false;
 //#define VERBOSE2
 //#define VERBOSE3
 
-absl::flat_hash_map<Node::Compact, int> test_order;
-int                                     test_order_sequence;
-void                                    setup_test_order() {
+std::unordered_map<Node::Compact, int, Node::Compact_hasher> test_order;
+int                                                          test_order_sequence;
+void                                                         setup_test_order() {
   test_order.clear();
   test_order_sequence = 1;
 }
@@ -99,7 +99,7 @@ void generate_graphs(int n) {
 
   for (int i = 0; i < n; i++) {
     std::string                    gname = "test_" + std::to_string(i);
-    Lgraph *                       g     = Lgraph::create("lgdb_iter_test", gname, "test");
+    Lgraph                        *g     = Lgraph::create("lgdb_iter_test", gname, "test");
     std::vector<Node_pin::Compact> spins;
     std::vector<Node_pin::Compact> dpins;
 
@@ -148,8 +148,9 @@ void generate_graphs(int n) {
       }
     }
 
-    int                                                                  nedges = SIZE_BASE * 4 + rand_r(&rseed) % (SIZE_BASE * 8);
-    absl::flat_hash_set<std::pair<Node_pin::Compact, Node_pin::Compact>> edges;
+    int nedges = SIZE_BASE * 4 + rand_r(&rseed) % (SIZE_BASE * 8);
+    std::unordered_set<std::pair<Node_pin::Compact, Node_pin::Compact>, absl::Hash<std::pair<Node_pin::Compact, Node_pin::Compact>>>
+        edges;
     for (int j = 0; j < nedges; j++) {
       int               counter = 0;
       Node_pin::Compact src;
@@ -206,7 +207,7 @@ void generate_graphs(int n) {
 bool fwd(int n) {
   for (int i = 0; i < n; i++) {
     std::string gname = "test_" + std::to_string(i);
-    Lgraph *    g     = Lgraph::open("lgdb_iter_test", gname);
+    Lgraph     *g     = Lgraph::open("lgdb_iter_test", gname);
     if (g == nullptr)
       return false;
 
@@ -224,13 +225,13 @@ bool fwd(int n) {
 bool bwd(int n) {
   for (int i = 0; i < n; i++) {
     std::string gname = "test_" + std::to_string(i);
-    Lgraph *    g     = Lgraph::open("lgdb_iter_test", gname);
+    Lgraph     *g     = Lgraph::open("lgdb_iter_test", gname);
     if (g == 0)
       return false;
 
     // g->dump();
     // fmt::print("----------------------\n");
-    absl::flat_hash_set<Node::Compact> visited;
+    std::unordered_set<Node::Compact, Node::Compact_hasher> visited;
     for (auto node : g->backward()) {
       // fmt::print(" bwd {}\n", node.debug_name());
 
@@ -274,8 +275,8 @@ bool bwd(int n) {
 
 void simple_line() {
   std::string gname   = "top_0";
-  Lgraph *    g0      = Lgraph::create("lgdb_iter_test", "g0", "test");
-  auto &      sfuture = g0->ref_library()->setup_sub("future", "test");
+  Lgraph     *g0      = Lgraph::create("lgdb_iter_test", "g0", "test");
+  auto       &sfuture = g0->ref_library()->setup_sub("future", "test");
   if (!sfuture.has_pin("fut_i"))
     sfuture.add_input_pin("fut_i", 10);
   if (!sfuture.has_pin("fut_o"))
@@ -349,8 +350,8 @@ void simple_line() {
 
 void simple(int num) {
   std::string gname = "simple_iter";
-  Lgraph *    g     = Lgraph::create("lgdb_iter_test", gname, "test");
-  Lgraph *    sub_g = Lgraph::create("lgdb_iter_test", "sub", "test");
+  Lgraph     *g     = Lgraph::create("lgdb_iter_test", gname, "test");
+  Lgraph     *sub_g = Lgraph::create("lgdb_iter_test", "sub", "test");
 
   for (int i = 0; i < 256; i++) {
     // Disconnected IOs from 1000-1512
@@ -678,8 +679,8 @@ int main(int argc, char **argv) {
     }
 #endif
 #ifdef ITER_REBUILD
-    auto *                                                        tlg = Lgraph::create(argv[1], "topo_sorted", "-");
-    absl::flat_hash_map<Node::Compact_class, Node::Compact_class> lg2tlg;
+    auto *tlg = Lgraph::create(argv[1], "topo_sorted", "-");
+    std::unordered_map<Node::Compact_class, Node::Compact_class, Node::Compact_class_hasher> lg2tlg;
     for (auto node : lg->forward()) {
       auto tnode = tlg->create_node(node);
 
@@ -780,7 +781,7 @@ int main(int argc, char **argv) {
 #endif
 #ifdef ITER_VECTOR
 #ifdef ITER_VECTOR_CHECK_ORDER
-      absl::flat_hash_set<Node::Compact_class> visited;
+      std::unordered_set<Node::Compact_class, Node::Compact_class_hasher> visited;
 #endif
 
       for (const auto &cnode : fwd_order) {

@@ -5,8 +5,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include <unordered_map>
+#include <unordered_set>
+
 #include "absl/strings/substitute.h"
 #include "kernel/rtlil.h"
 #include "kernel/yosys.h"
@@ -25,17 +26,17 @@ USING_YOSYS_NAMESPACE
 class Lgyosys_dump : public Inou {
 private:
   RTLIL::Design *design;
-  RTLIL::Wire *  get_wire(const Node_pin &pin);
-  RTLIL::Wire *  add_wire(RTLIL::Module *module, const Node_pin &pin);
+  RTLIL::Wire   *get_wire(const Node_pin &pin);
+  RTLIL::Wire   *add_wire(RTLIL::Module *module, const Node_pin &pin);
 
   void to_yosys(Lgraph *g);
 
-  absl::flat_hash_set<std::string_view>                            created_sub;
-  absl::flat_hash_map<Node_pin::Compact, RTLIL::Wire *>            input_map;
-  absl::flat_hash_map<Node_pin::Compact, RTLIL::Wire *>            output_map;
-  absl::flat_hash_map<Node_pin::Compact, RTLIL::Wire *>            cell_output_map;
-  absl::flat_hash_map<Node::Compact, std::vector<RTLIL::SigChunk>> mem_output_map;
-  absl::flat_hash_set<RTLIL::Wire *>                               unsigned_wire;
+  std::unordered_set<std::string_view>                                                  created_sub;
+  std::unordered_map<Node_pin::Compact, RTLIL::Wire *, Node_pin::Compact_hasher>        input_map;
+  std::unordered_map<Node_pin::Compact, RTLIL::Wire *, Node_pin::Compact_hasher>        output_map;
+  std::unordered_map<Node_pin::Compact, RTLIL::Wire *, Node_pin::Compact_hasher>        cell_output_map;
+  std::unordered_map<Node::Compact, std::vector<RTLIL::SigChunk>, Node::Compact_hasher> mem_output_map;
+  std::unordered_set<RTLIL::Wire *>                                                     unsigned_wire;
 
   uint64_t ids = 0;
 

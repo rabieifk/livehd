@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
 #include "lgedgeiter.hpp"
 #include "lgraph.hpp"
 
@@ -16,7 +16,7 @@ Lgraph* create_some_random_lgraph() {
 void populate_graph(Lgraph* lg) {
   (void)lg;
 #if 0
-  absl::flat_hash_map<Node::Compact, graph::Bi_adjacency_list::Vert> map2g2vertex;
+  std::unordered_map<Node::Compact, graph::Bi_adjacency_list::Vert, Node::Compact_hasher> map2g2vertex;
 
   map2g2vertex[lg->get_graph_input_node().get_compact()]  = g2.insert_vert();
   map2g2vertex[lg->get_graph_output_node().get_compact()] = g2.insert_vert();

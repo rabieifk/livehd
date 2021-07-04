@@ -7,12 +7,14 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <cctype>
 #include <iostream>
 #include <limits>
 #include <string>
 
+#include "absl/strings/str_cat.h"
 #include "iassert.hpp"
 #include "likely.hpp"
 
@@ -129,7 +131,7 @@ void Elab_scanner::add_token(Etoken &t) {
   token_list.push_back(t);
 }
 
-void Elab_scanner::patch_pass(const absl::flat_hash_map<std::string, Token_id> &keywords) {
+void Elab_scanner::patch_pass(const std::unordered_map<std::string, Token_id> &keywords) {
   for (size_t i = 0; i < token_list.size(); ++i) {
     auto &t = token_list[i];
     if (t.tok != Token_id_alnum)
@@ -153,7 +155,7 @@ void Elab_scanner::patch_pass(const absl::flat_hash_map<std::string, Token_id> &
       continue;
     }
 
-    auto it = keywords.find(txt);
+    auto it = keywords.find(txt.data());
     if (it == keywords.end())
       continue;
 
@@ -379,7 +381,7 @@ void Elab_scanner::unregister_memblock() {
 
   int ok = munmap((void *)memblock.data(), memblock.size());
   I(ok == 0);
-  close(memblock_fd);
+  ::close(memblock_fd);
 
   memblock    = "";
   memblock_fd = -1;

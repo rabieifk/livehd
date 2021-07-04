@@ -3,6 +3,8 @@
 
 #include <functional>
 
+#include "absl/hash/hash.h"
+#include "absl/strings/str_cat.h"
 #include "lgedgeiter.hpp"
 #include "lgraph.hpp"
 
@@ -10,7 +12,7 @@ Node_tree::Node_tree(Lgraph* root_arg)
     : mmap_lib::tree<Node>(root_arg->get_path(), absl::StrCat(root_arg->get_name(), "_ntree")), root(root_arg), last_free() {
   set_root(Node());
 
-  absl::flat_hash_set<Hierarchy_index>                      hidx_used;
+  std::unordered_set<Hierarchy_index, absl::Hash<Hierarchy_index>> hidx_used;
   std::function<void(Lgraph*, Hierarchy_index, Tree_index)> add_lg_nodes = [&](Lgraph* lg, Hierarchy_index hidx, Tree_index tidx) {
     auto ht = root->ref_htree();
 
@@ -54,7 +56,7 @@ Node_tree::Node_tree(Lgraph* root_arg)
             fmt::print("testing l:{}, p:{} ({})\n", (int)sub_hidx.level, (int)sub_hidx.pos, sub_lg->get_name());
           }
 
-          if (ht->ref_lgraph(sub_hidx) == sub_lg && !hidx_used.contains(sub_hidx)) {
+          if (ht->ref_lgraph(sub_hidx) == sub_lg && hidx_used.find(sub_hidx) == hidx_used.end()) {
             found = true;
             if (debug_verbose) {
               fmt::print("found l:{}, p:{} ({}), recursing.\n", (int)sub_hidx.level, (int)sub_hidx.pos, sub_lg->get_name());

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <set>
 
+#include "absl/strings/str_cat.h"
 #include "graph_library.hpp"
 #include "iassert.hpp"
 #include "lgedgeiter.hpp"
@@ -57,7 +58,7 @@ void Lgraph_Base::emplace_back() {
   node_internal.emplace_back();
 
   Index_id nid = node_internal.size() - 1;
-  auto *   ptr = node_internal.ref(nid);
+  auto    *ptr = node_internal.ref(nid);
 
   if (ptr->is_page_align()) {
     auto *page = (Node_internal_Page *)ptr;

@@ -3,9 +3,8 @@
 
 #include <map>
 #include <set>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
 #include "lgraph.hpp"
 
 namespace Live_synth {
@@ -26,23 +25,23 @@ struct Net_ID_hash {
   }
 };
 
-typedef absl::flat_hash_set<Net_ID, Net_ID_hash> Net_set;
-typedef absl::flat_hash_set<Instance_name>       Instance_set;
-typedef absl::flat_hash_set<Graph_ID>            Graph_set;
+typedef std::unordered_set<Net_ID, Net_ID_hash> Net_set;
+typedef std::unordered_set<Instance_name>       Instance_set;
+typedef std::unordered_set<Graph_ID>            Graph_set;
 
-typedef absl::flat_hash_set<Index_id, Index_id_hash> Gate_set;
+typedef std::unordered_set<Index_id, Index_id_hash> Gate_set;
 }  // namespace Live_synth
 
 using namespace Live_synth;
 class Invariant_boundaries {
 public:
-  absl::flat_hash_map<Instance_name, Graph_ID> instance_type_map;    // all_instances
-  absl::flat_hash_map<Graph_ID, Instance_set>  instance_collection;  // instances
-  absl::flat_hash_map<Graph_ID, Graph_set>     hierarchy_tree;       // tree
+  std::unordered_map<Instance_name, Graph_ID> instance_type_map;    // all_instances
+  std::unordered_map<Graph_ID, Instance_set>  instance_collection;  // instances
+  std::unordered_map<Graph_ID, Graph_set>     hierarchy_tree;       // tree
 
-  absl::flat_hash_map<Net_ID, Net_set, Net_ID_hash>      invariant_cones;       // sips
-  absl::flat_hash_map<Net_ID, Gate_set, Net_ID_hash>     invariant_cone_cells;  // gate_count
-  absl::flat_hash_map<Index_id, uint32_t, Index_id_hash> gate_appearances;      // shared_gates
+  std::unordered_map<Net_ID, Net_set, Net_ID_hash>      invariant_cones;       // sips
+  std::unordered_map<Net_ID, Gate_set, Net_ID_hash>     invariant_cone_cells;  // gate_count
+  std::unordered_map<Index_id, uint32_t, Index_id_hash> gate_appearances;      // shared_gates
 
   std::string top;
   std::string hierarchical_separator;

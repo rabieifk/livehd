@@ -1,6 +1,7 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
+
 #include "lgedgeiter.hpp"
 #include "lgraph.hpp"
 #include "mmap_map.hpp"

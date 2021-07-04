@@ -4,10 +4,10 @@
 #include <cassert>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
 #include "err_tracker.hpp"
 #include "explicit_type.hpp"
 #include "fmt/format.h"
@@ -334,10 +334,10 @@ public:
     ;
   }
 
-  void patch_pass(const absl::flat_hash_map<std::string, Token_id> &keywords);
+  void patch_pass(const std::unordered_map<std::string, Token_id> &keywords);
 
   void patch_pass() {
-    absl::flat_hash_map<std::string, Token_id> no_keywords;
+    std::unordered_map<std::string, Token_id> no_keywords;
     patch_pass(no_keywords);
   }
 

@@ -6,9 +6,11 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include "absl/hash/hash.h"
+#include "absl/strings/str_cat.h"
 #include "kernel/celltypes.h"
 #include "kernel/sigtools.h"
 #include "kernel/yosys.h"
@@ -28,18 +30,18 @@
 USING_YOSYS_NAMESPACE
 PRIVATE_NAMESPACE_BEGIN
 
-static CellTypes                        ct_all;
-static absl::flat_hash_set<size_t>      driven_signals;
-static absl::flat_hash_set<std::string> cell_port_inputs;
-static absl::flat_hash_set<std::string> cell_port_outputs;
+static CellTypes                       ct_all;
+static std::unordered_set<size_t>      driven_signals;
+static std::unordered_set<std::string> cell_port_inputs;
+static std::unordered_set<std::string> cell_port_outputs;
 
 typedef std::pair<const RTLIL::Wire *, int> Wire_bit;
 
-static absl::flat_hash_map<const RTLIL::Wire *, Node_pin>          wire2pin;
-static absl::flat_hash_map<const RTLIL::Cell *, Node>              cell2node;  // Points to the exit_node for the block
-static absl::flat_hash_map<const RTLIL::Wire *, Node_pin_iterator> partially_assigned;
-static absl::flat_hash_map<const RTLIL::Wire *, std::vector<int>>  partially_assigned_bits;
-static absl::flat_hash_map<const RTLIL::Wire *, std::vector<int>>  partially_assigned_fwd;
+static std::unordered_map<const RTLIL::Wire *, Node_pin>          wire2pin;
+static std::unordered_map<const RTLIL::Cell *, Node>              cell2node;  // Points to the exit_node for the block
+static std::unordered_map<const RTLIL::Wire *, Node_pin_iterator> partially_assigned;
+static std::unordered_map<const RTLIL::Wire *, std::vector<int>>  partially_assigned_bits;
+static std::unordered_map<const RTLIL::Wire *, std::vector<int>>  partially_assigned_fwd;
 
 static std::vector<const RTLIL::Wire *> pending_outputs;
 
@@ -138,11 +140,13 @@ public:
   };
 };
 
+using Pick_ID_hasher = absl::Hash<Pick_ID>;
+
 bool operator==(const Pick_ID &lhs, const Pick_ID &rhs) {
   return lhs.driver == rhs.driver && lhs.width == rhs.width && lhs.offset == rhs.offset && lhs.is_signed == rhs.is_signed;
 }
 
-static absl::flat_hash_map<Pick_ID, Node_pin> picks;
+static std::unordered_map<Pick_ID, Node_pin, Pick_ID_hasher> picks;
 
 static Node_pin create_pick_operator(const Node_pin &wide_dpin, int offset, int width, bool is_signed) {
   if (offset == 0 && (int)wide_dpin.get_bits() == width && !is_signed)
@@ -1102,8 +1106,8 @@ static void process_partially_assigned_self_chains(Lgraph *g) {
 
     while (pending_chain) {
       pending_chain = false;
-      absl::flat_hash_set<int> ready_pos;
-      absl::flat_hash_set<int> shifts;
+      std::unordered_set<int> ready_pos;
+      std::unordered_set<int> shifts;
 
       for (int pos = 0; pos < (int)partially_assigned_fwd[wire].size(); ++pos) {
         auto shift = partially_assigned_fwd[wire][pos];
@@ -2151,7 +2155,7 @@ static void process_cells(RTLIL::Module *module, Lgraph *g) {
     } else if (cell->type.c_str()[0] == '\\' || strncmp(cell->type.c_str(), "$paramod\\", 9) == 0) {  // sub_cell type
       I(exit_node.is_type_sub());
 
-      absl::flat_hash_set<XEdge::Compact> added_edges;
+      std::unordered_set<XEdge::Compact, XEdge::Compact_hasher> added_edges;
 
       const auto &sub = exit_node.get_type_sub_node();
 
@@ -2239,7 +2243,7 @@ struct Yosys2lg_Pass : public Yosys::Pass {
 
     for (auto &it : design->modules_) {
       RTLIL::Module *module = it.second;
-      auto *         g      = library->try_find_lgraph(&module->name.c_str()[1]);
+      auto          *g      = library->try_find_lgraph(&module->name.c_str()[1]);
       if (g == nullptr) {
         g = ::Lgraph::create(path, &module->name.c_str()[1], "-");
       }

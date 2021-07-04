@@ -40,7 +40,7 @@ void Lcompiler::do_prp_local_cprop_bitwidth() {
   // for each lgraph, bottom up approach to parallelly do cprop->bw->cprop;
   // also use a visited table to avoid duplicated visitations
   std::mutex                    lg_visited_mutex;
-  absl::flat_hash_set<Lgraph *> lg_visited;
+  std::unordered_set<Lgraph *> lg_visited;
 
   for (auto &lg : lgs) {
     {
@@ -234,7 +234,7 @@ void Lcompiler::do_fir_firmap_bitwidth() {
   auto top_name_before_firmap = absl::StrCat("__firrtl_", top);
 
   std::mutex                    lg_visited_mutex;
-  absl::flat_hash_set<Lgraph *> lg_visited;
+  std::unordered_set<Lgraph *> lg_visited;
 
   std::vector<Lgraph *> new_lgs;
 

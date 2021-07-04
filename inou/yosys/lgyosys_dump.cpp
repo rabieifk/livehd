@@ -481,7 +481,7 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
 
     for (const auto &e : node.inp_edges()) {
       auto *w = get_wire(e.driver);
-      if (unsigned_wire.contains(w)) {
+      if (unsigned_wire.find(w) != unsigned_wire.end()) {
         some_inp_unsigned = true;
       } else {
         all_inp_unsigned = false;
@@ -500,13 +500,13 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
 
           auto *w = get_wire(e.driver);
           if (e.sink.get_pid() == 0) {
-            if (!all_inp_unsigned && unsigned_wire.contains(w)) {
+            if (!all_inp_unsigned && unsigned_wire.find(w) != unsigned_wire.end()) {
               w = zero_extend_one_bit(g, module, w);
             }
             assert(e.sink.get_pin_name() == "A");
             add_signed.push_back(w);
           } else {
-            if (unsigned_wire.contains(w)) {
+            if (unsigned_wire.find(w) != unsigned_wire.end()) {
               w = zero_extend_one_bit(g, module, w);
             }
             assert(e.sink.get_pin_name() == "B");
@@ -666,7 +666,7 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
             }
           }
           auto *w = get_wire(e.driver);
-          if (!all_inp_unsigned && unsigned_wire.contains(w)) {
+          if (!all_inp_unsigned && unsigned_wire.find(w) != unsigned_wire.end()) {
             w = zero_extend_one_bit(g, module, w);
           }
           inps.push_back(w);
@@ -841,10 +841,10 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
       } break;
       case Ntype_op::EQ: {
         std::vector<RTLIL::Wire *> rest;
-        RTLIL::Wire *              first = nullptr;
+        RTLIL::Wire               *first = nullptr;
         for (const auto &e : node.inp_edges()) {
           auto *w = get_wire(e.driver);
-          if (!all_inp_unsigned && unsigned_wire.contains(w)) {
+          if (!all_inp_unsigned && unsigned_wire.find(w) != unsigned_wire.end()) {
             w = zero_extend_one_bit(g, module, w);
           }
           if (first)
@@ -905,7 +905,7 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
         for (auto *lhs : v_lhs) {
           for (auto *rhs : v_rhs) {
             bool must_be_signed = true;
-            if (unsigned_wire.contains(rhs) && unsigned_wire.contains(lhs))
+            if (unsigned_wire.find(rhs) != unsigned_wire.end() && unsigned_wire.find(lhs) != unsigned_wire.end())
               must_be_signed = false;
 
             RTLIL::Wire *wire;
@@ -938,7 +938,7 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
 
         auto dpin = cell_output_map[node.get_driver_pin().get_compact()];
 
-        if (unsigned_wire.contains(lhs)) {
+        if (unsigned_wire.find(lhs) != unsigned_wire.end()) {
           if (b_dpin.get_node().is_type_const()) {  // common optimization
             auto amount = RTLIL::Const::from_string(b_dpin.get_node().get_type_const().to_yosys());
             module->addShr(next_id(g), lhs, amount, dpin, false);
@@ -964,14 +964,14 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
         auto *result_wire = cell_output_map[node.get_driver_pin().get_compact()];
         if (b_dpin.get_node().is_type_const()) {  // common optimization
           auto amount = RTLIL::Const::from_string(b_dpin.get_node().get_type_const().to_yosys());
-          if (unsigned_wire.contains(lhs)) {
+          if (unsigned_wire.find(lhs) != unsigned_wire.end()) {
             module->addShl(next_id(g), lhs, amount, result_wire, false);
             unsigned_wire.insert(result_wire);
           } else {
             module->addSshl(next_id(g), lhs, amount, result_wire, true);
           }
         } else {
-          if (unsigned_wire.contains(lhs)) {
+          if (unsigned_wire.find(lhs) != unsigned_wire.end()) {
             module->addShl(next_id(g), lhs, rhs, result_wire, false);
             unsigned_wire.insert(result_wire);
           } else {
@@ -981,7 +981,7 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
       } break;
       case Ntype_op::Mux: {
         std::vector<RTLIL::Wire *> port;
-        RTLIL::Wire *              sel = nullptr;
+        RTLIL::Wire               *sel = nullptr;
 
         auto out_width = cell_output_map[node.get_driver_pin().get_compact()]->width;
 
@@ -1005,7 +1005,7 @@ void Lgyosys_dump::to_yosys(Lgraph *g) {
             auto *new_wire = module->addWire(next_id(g), out_width);
 
             if (wire->width < out_width) {
-              if (unsigned_wire.contains(wire))
+              if (unsigned_wire.find(wire) != unsigned_wire.end())
                 w2.extend_u0(out_width, false);  // zero extend
               else
                 w2.extend_u0(out_width, true);  // sign extend

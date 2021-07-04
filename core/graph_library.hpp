@@ -1,17 +1,18 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 #pragma once
 
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
 #include "absl/types/span.h"
 #include "lgraphbase.hpp"
 #include "sub_node.hpp"
@@ -27,7 +28,7 @@ protected:
   inline static std::mutex lgs_mutex;
 
   struct Graph_attributes {
-    Lgraph *    lg;
+    Lgraph     *lg;
     std::string source;  // File were this module came from. If file updated (all the associated Lgraphs must be deleted). If empty,
                          // it ies not present (blackbox)
     Lg_type_id version;  // In which sequence order were the graphs last modified
@@ -48,10 +49,10 @@ protected:
   std::vector<Tech_via>   via_list;    // only for routing
   // END: common attributes
 
-  using Global_instances   = absl::flat_hash_map<std::string, Graph_library *>;
-  using Global_name2lgraph = absl::flat_hash_map<std::string, absl::flat_hash_map<std::string, Lgraph *>>;
-  using Name2id            = absl::flat_hash_map<std::string, Lg_type_id::type>;
-  using Recycled_id        = absl::flat_hash_set<uint64_t>;
+  using Global_instances   = std::unordered_map<std::string, Graph_library *>;
+  using Global_name2lgraph = std::unordered_map<std::string, std::unordered_map<std::string, Lgraph *>>;
+  using Name2id            = std::unordered_map<std::string, Lg_type_id::type>;
+  using Recycled_id        = std::unordered_set<uint64_t>;
 
   const std::string path;
   const std::string library_file;
@@ -87,13 +88,13 @@ protected:
 
   static Lgraph *try_find_lgraph_int(std::string_view path, std::string_view name);
   static Lgraph *try_find_lgraph_int(std::string_view path, Lg_type_id lgid);
-  Lgraph *       try_find_lgraph_int(std::string_view name) const;
-  Lgraph *       try_find_lgraph_int(Lg_type_id lgid) const;
+  Lgraph        *try_find_lgraph_int(std::string_view name) const;
+  Lgraph        *try_find_lgraph_int(Lg_type_id lgid) const;
 
-  Sub_node &      reset_sub_int(std::string_view name, std::string_view source);
-  Sub_node &      setup_sub_int(std::string_view name, std::string_view source);
-  Sub_node &      setup_sub_int(std::string_view name);
-  Sub_node *      ref_sub_int(Lg_type_id lgid);
+  Sub_node       &reset_sub_int(std::string_view name, std::string_view source);
+  Sub_node       &setup_sub_int(std::string_view name, std::string_view source);
+  Sub_node       &setup_sub_int(std::string_view name);
+  Sub_node       *ref_sub_int(Lg_type_id lgid);
   const Sub_node &get_sub_int(Lg_type_id lgid) const;
 
   Lg_type_id add_name_int(std::string_view name, std::string_view source);
@@ -109,7 +110,7 @@ protected:
   }
 
   Lg_type_id get_lgid_int(std::string_view name) const {
-    const auto &it = name2id.find(name);
+    const auto &it = name2id.find(name.data());
     if (it != name2id.end()) {
       return it->second;
     }
@@ -130,7 +131,7 @@ protected:
     return attributes[lgid].version;
   }
 
-  bool has_name_int(std::string_view name) const { return name2id.find(name) != name2id.end(); }
+  bool has_name_int(std::string_view name) const { return name2id.find(name.data()) != name2id.end(); }
 
   static Graph_library *instance_int(std::string_view path);
 

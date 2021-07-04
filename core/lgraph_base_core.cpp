@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "absl/strings/str_cat.h"
 #include "graph_library.hpp"
 #include "lgedgeiter.hpp"
 #include "mmap_map.hpp"

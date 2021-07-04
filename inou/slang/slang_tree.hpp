@@ -24,7 +24,7 @@ public:
   static std::vector<std::shared_ptr<Lnast>> pick_lnast();
 
 protected:
-  static inline absl::flat_hash_map<std::string, std::shared_ptr<Lnast>> parsed_lnasts;
+  static inline std::unordered_map<std::string, std::shared_ptr<Lnast>> parsed_lnasts;
 
   int                    tmp_var_cnt;
   std::shared_ptr<Lnast> lnast;
@@ -32,7 +32,7 @@ protected:
 
   enum class Net_attr { Input, Output, Register, Local };
 
-  absl::flat_hash_map<std::string, Net_attr> net2attr;
+  std::unordered_map<std::string, Net_attr> net2attr;
 
   std::string_view create_lnast_tmp();
   std::string_view create_lnast(int val);

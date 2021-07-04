@@ -1,10 +1,9 @@
 //  This file is distributed under the BSD 3-Clause License. See LICENSE for details.
 
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/node_hash_map.h"
 #include "flat_hash_map.hpp"
 #include "fmt/format.h"
 #include "iassert.hpp"
@@ -151,9 +150,9 @@ void random_robin_map(int max) {
 }
 
 void random_abseil_map(int max) {
-  Lrand<int>                              rng;
-  Lbench                                  b("mmap.random_abseil_map_" + std::to_string(max));
-  absl::flat_hash_map<uint32_t, uint32_t> map;
+  Lrand<int>                             rng;
+  Lbench                                 b("mmap.random_abseil_map_" + std::to_string(max));
+  std::unordered_map<uint32_t, uint32_t> map;
   for (int n = 1; n < 100; ++n) {
     for (int i = 0; i < BENCHSIZE; ++i) {
       int pos  = rng.max(max);

@@ -4,19 +4,20 @@
 
 #include <atomic>
 #include <mutex>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_cat.h"
 #include "lgraph.hpp"
 #include "mmap_bimap.hpp"
 #include "mmap_map.hpp"
 
 template <const char *Name, typename Base, typename Attr_data>
 class Attribute {
-  inline static std::mutex                                    lgs_mutex;
-  inline static absl::flat_hash_map<std::string, Attr_data *> lg2attr;
+  inline static std::mutex                                   lgs_mutex;
+  inline static std::unordered_map<std::string, Attr_data *> lg2attr;
 
   inline static thread_local const Lgraph *last_lg   = nullptr;
-  inline static thread_local Attr_data *   last_attr = nullptr;
+  inline static thread_local Attr_data    *last_attr = nullptr;
 
   static std::string_view get_base() {
     if constexpr (std::is_same<Base, Node>::value) {

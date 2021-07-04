@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <cassert>
 #include <climits>
@@ -12,8 +13,7 @@
 #include <iostream>
 #include <map>
 #include <mutex>
-
-#include "absl/container/flat_hash_map.h"
+#include <unordered_map>
 
 #ifndef MMAP_LIB_LIKELY
 #define MMAP_LIB_LIKELY(x) __builtin_expect((x), 1)
@@ -49,7 +49,7 @@ class mmap_gc {
 protected:
   static inline std::mutex lgs_mutex;
 
-  using gc_pool_type = absl::flat_hash_map<void *, mmap_gc_entry>;  // pointer stability for delete
+  using gc_pool_type = std::unordered_map<void *, mmap_gc_entry>;  // pointer stability for delete
   static inline gc_pool_type mmap_gc_pool;
 
   static inline int n_open_mmaps = 0;

@@ -9,7 +9,7 @@ using namespace Live;
 
 void Invariant_finder::get_topology() {
   std::vector<Lgraph *>         discovered;
-  absl::flat_hash_set<Lgraph *> visited;
+  std::unordered_set<Lgraph *> visited;
 
   discovered.push_back(elab_graph);
 
@@ -94,7 +94,7 @@ void Invariant_finder::propagate_until_boundary(Index_id nid, uint32_t bit_selec
 
   for (auto &edge : synth_graph->inp_edges(master_id)) {
     // in cases like join/pick we only propagate to a specific bit
-    absl::flat_hash_set<uint32_t> bit_selections;
+    std::unordered_set<uint32_t> bit_selections;
     int propagate = resolve_bit(synth_graph, nid, bit_selection, edge.get_inp_pin().get_pid(), bit_selections);
     if (propagate == -1)
       continue;
@@ -167,7 +167,7 @@ void Invariant_finder::find_invariant_boundaries() {
   std::string path = elab_graph->get_path();
   get_topology();
 
-  absl::flat_hash_map<Net_ID, Index_id> invariant_boundaries;
+  std::unordered_map<Net_ID, Index_id> invariant_boundaries;
   for (auto &_inst : boundaries.instance_type_map) {
     Instance_name inst = _inst.first;
     if (inst == "##TOP##")

@@ -2,8 +2,8 @@
 #pragma once
 
 #include <array>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
 #include "lconst.hpp"
 #include "lnast.hpp"
 #include "pass.hpp"
@@ -11,8 +11,8 @@
 class Opt_lnast {
 protected:
   int                                           level;
-  absl::flat_hash_map<std::string, std::string> level_forward_ref;
-  absl::flat_hash_map<std::string, Lconst>      level_forward_val;
+  std::unordered_map<std::string, std::string> level_forward_ref;
+  std::unordered_map<std::string, Lconst>      level_forward_val;
 
   void process_plus(std::shared_ptr<Lnast> ln, const Lnast_nid &lnid);
   void process_assign(std::shared_ptr<Lnast> ln, const Lnast_nid &lnid);

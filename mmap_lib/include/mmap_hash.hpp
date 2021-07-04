@@ -2,10 +2,10 @@
 
 #pragma once
 
-namespace mmap_lib {
-
 #include "waterhash.hpp"
 #include "woothash.hpp"
+
+namespace mmap_lib {
 
 static inline uint64_t hash64(const void *key, uint32_t len, uint64_t seed = 1023) { return woothash64(key, len, seed); }
 

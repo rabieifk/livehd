@@ -5,8 +5,8 @@
 
 #include "lnast.hpp"
 
-using FlatHashMap = absl::flat_hash_map<std::string_view, std::string_view>;
-using FlatHashSet = absl::flat_hash_set<std::string_view>;
+using FlatHashMap = std::unordered_map<std::string_view, std::string_view>;
+using FlatHashSet = std::unordered_set<std::string_view>;
 
 class Semantic_check {
 private:

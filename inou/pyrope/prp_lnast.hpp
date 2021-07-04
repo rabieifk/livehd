@@ -16,8 +16,8 @@ protected:
 
   mmap_lib::Tree_index cur_stmts = mmap_lib::Tree_index(-1, -1);
 
-  absl::flat_hash_map<Lnast_ntype::Lnast_ntype_int, uint8_t> priority_map;
-  absl::flat_hash_set<Rule_id>                               expr_rules;
+  std::unordered_map<Lnast_ntype::Lnast_ntype_int, uint8_t> priority_map;
+  std::unordered_set<Rule_id>                               expr_rules;
 
   // std::list<std::string> temp_vars;
   std::string      last_temp_var;

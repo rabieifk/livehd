@@ -8,9 +8,11 @@
 #include "pass.hpp"
 #include "struct_firbits.hpp"
 
-using FBMap   = absl::flat_hash_map<Node_pin::Compact_class_driver, Firrtl_bits>;  // pin->firrtl bits
-using PinMap  = absl::flat_hash_map<Node_pin, Node_pin>;                           // old_pin to new_pin for both dpin and spin
-using XorrMap = absl::flat_hash_map<Node_pin, std::vector<Node_pin>>;  // special case for xorr one old spin -> multi newspin
+using FBMap
+    = std::unordered_map<Node_pin::Compact_class_driver, Firrtl_bits, Node_pin::Compact_class_driver_hasher>;  // pin->firrtl bits
+using PinMap = std::unordered_map<Node_pin, Node_pin, Node_pin_hasher>;  // old_pin to new_pin for both dpin and spin
+using XorrMap
+    = std::unordered_map<Node_pin, std::vector<Node_pin>, Node_pin_hasher>;  // special case for xorr one old spin -> multi newspin
 
 class Firmap {
 protected:
@@ -18,11 +20,11 @@ protected:
   bool firmap_issues     = false;
   bool firbits_wait_flop = false;
 
-  absl::node_hash_map<Lgraph *, FBMap> &  fbmaps;   // firbits maps center
-  absl::node_hash_map<Lgraph *, PinMap> & pinmaps;  // pin maps center
+  absl::node_hash_map<Lgraph *, FBMap>   &fbmaps;   // firbits maps center
+  absl::node_hash_map<Lgraph *, PinMap>  &pinmaps;  // pin maps center
   absl::node_hash_map<Lgraph *, XorrMap> &spinmaps_xorr;
-  // absl::flat_hash_map<Node_pin, Node_pin>                  pinmap;       // old_pin to new_pin for both dpin and spin
-  // absl::flat_hash_map<Node_pin, std::vector<Node_pin>>     spinmap_xorr;
+  // std::unordered_map<Node_pin, Node_pin>                  pinmap;       // old_pin to new_pin for both dpin and spin
+  // std::unordered_map<Node_pin, std::vector<Node_pin>>     spinmap_xorr;
   enum class Attr { Set_other, Set_ubits, Set_sbits, Set_max, Set_min, Set_dp_assign };
 
   static Attr     get_key_attr(std::string_view key);

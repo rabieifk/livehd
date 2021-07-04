@@ -107,7 +107,7 @@ void Graphviz::do_hierarchy(Lgraph *g) {
 
   const auto &root_tree = g->get_htree();
 
-  absl::flat_hash_set<std::pair<Hierarchy_index, Hierarchy_index>> added;
+  std::unordered_set<std::pair<Hierarchy_index, Hierarchy_index>, absl::Hash<std::pair<Hierarchy_index, Hierarchy_index>>> added;
 
   for (auto hidx : root_tree.depth_preorder()) {
     auto *lg = root_tree.ref_lgraph(hidx);
@@ -124,7 +124,7 @@ void Graphviz::do_hierarchy(Lgraph *g) {
       auto p = std::pair(e.driver.get_hidx(), e.sink.get_hidx());
       if (p.first == p.second)
         continue;  // no itself edges
-      if (added.contains(p))
+      if (added.find(p) != added.end())
         continue;
       added.insert(p);
 
@@ -148,7 +148,7 @@ void Graphviz::do_hierarchy(Lgraph *g) {
       auto p = std::pair(e.driver.get_hidx(), e.sink.get_hidx());
       if (p.first == p.second)
         continue;  // no itself edges
-      if (added.contains(p))
+      if (added.find(p) != added.end())
         continue;
       added.insert(p);
 
@@ -168,8 +168,8 @@ void Graphviz::do_hierarchy(Lgraph *g) {
 }
 
 void Graphviz::create_color_map(Lgraph *lg) {
-  std::set<int>                 colors_used;
-  absl::flat_hash_map<int, int> color2size;
+  std::set<int>                colors_used;
+  std::unordered_map<int, int> color2size;
 
   float max_size = 1;
   for (auto node : lg->fast()) {
@@ -193,7 +193,7 @@ void Graphviz::create_color_map(Lgraph *lg) {
     data += fmt::format(" c{} [label=<{}>,style=\"filled\",fillcolor=\"{}\"];\n", c, sz, color.to_s());
   }
 
-  absl::flat_hash_set<uint64_t> edges;  // hackish graph
+  std::unordered_set<uint64_t> edges;  // hackish graph
   for (auto node : lg->fast()) {
     if (!node.has_color())
       continue;
@@ -211,7 +211,7 @@ void Graphviz::create_color_map(Lgraph *lg) {
       edge <<= 32;
       edge |= sc;
 
-      if (edges.contains(edge))
+      if (edges.find(edge) != edges.end())
         continue;
 
       data += fmt::format(" c{}->c{};\n", c, sc);

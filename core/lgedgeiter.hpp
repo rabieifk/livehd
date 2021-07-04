@@ -7,15 +7,15 @@
 
 class Fast_edge_iterator {
 protected:
-  Lgraph *   top_g;
+  Lgraph    *top_g;
   const bool visit_sub;
 
 public:
   class Fast_iter {
   private:
     // TODO: It may be clear to have Node, not all the Node fileds here (historical reasons before Node existed)
-    Lgraph *        top_g;
-    Lgraph *        current_g;
+    Lgraph         *top_g;
+    Lgraph         *current_g;
     Hierarchy_index hidx;
     Index_id        nid;
     const bool      visit_sub;
@@ -73,10 +73,10 @@ protected:
   Fast_edge_iterator::Fast_iter global_it;
 
   // State built during iteration
-  const bool                              visit_sub;
-  absl::flat_hash_set<Node::Compact>      unvisited;
-  std::vector<Node>                       pending_stack;
-  absl::flat_hash_map<Node::Compact, int> pending_loop_detect;
+  const bool                                                   visit_sub;
+  std::unordered_set<Node::Compact, Node::Compact_hasher>      unvisited;
+  std::vector<Node>                                            pending_stack;
+  std::unordered_map<Node::Compact, int, Node::Compact_hasher> pending_loop_detect;
 
   Flow_base_iterator(Lgraph *lg, bool _visit_sub);
   Flow_base_iterator(bool _visit_sub);
@@ -87,7 +87,7 @@ public:
   void add_node(const Node &node) {
     bool all_inputs_visited = true;
     for (const auto &e : node.inp_edges()) {
-      if (unvisited.contains(e.driver.get_node().get_compact())) {
+      if (unvisited.find(e.driver.get_node().get_compact()) != unvisited.end()) {
         all_inputs_visited = false;
         break;
       }
@@ -134,7 +134,7 @@ public:
   };
 
 protected:
-  Lgraph *   top_g;
+  Lgraph    *top_g;
   const bool visit_sub;
 
 public:
@@ -175,7 +175,7 @@ public:
   };
 
 protected:
-  Lgraph *   top_g;
+  Lgraph    *top_g;
   const bool visit_sub;
 
 public:

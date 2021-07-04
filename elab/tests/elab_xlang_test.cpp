@@ -9,8 +9,8 @@
 #include <sys/types.h>
 
 #include <string>
+#include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
 #include "elab_scanner.hpp"
 
 // control
@@ -42,7 +42,7 @@ constexpr uint8_t Xlanguage_id_in        = 147;
 constexpr uint8_t Xlanguage_id_by        = 148;
 
 class Xlanguage_scanner : public Elab_scanner {
-  absl::flat_hash_map<std::string, uint8_t> xlang_keyword;
+  std::unordered_map<std::string, uint8_t> xlang_keyword;
 
 public:
   // pub vars for testing

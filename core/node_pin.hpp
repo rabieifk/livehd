@@ -7,6 +7,7 @@ class Node;
 
 #include <vector>
 
+#include "absl/hash/hash.h"
 #include "ann_ssa.hpp"
 #include "hierarchy.hpp"
 #include "lgedge.hpp"
@@ -27,8 +28,8 @@ protected:
   friend class Bwd_edge_iterator;
   friend class Edge_raw;
 
-  Lgraph *        top_g;
-  Lgraph *        current_g;
+  Lgraph         *top_g;
+  Lgraph         *current_g;
   Hierarchy_index hidx;
   Index_id        idx;
   Port_ID         pid;
@@ -96,6 +97,9 @@ public:
       return H::combine(std::move(h), s.hidx.get_hash(), s.idx, s.sink);
     };
   };
+
+  using Compact_hasher = absl::Hash<Compact>;
+
   class __attribute__((packed)) Compact_flat {
   protected:
     uint32_t lgid;
@@ -185,6 +189,8 @@ public:
     };
   };
 
+  using Compact_driver_hasher = absl::Hash<Compact_driver>;
+
   class __attribute__((packed)) Compact_class {
   protected:
     uint32_t idx : Index_bits;
@@ -226,6 +232,8 @@ public:
     }
   };
 
+  using Compact_class_hasher = absl::Hash<Compact_class>;
+
   class __attribute__((packed)) Compact_class_driver {
   protected:
     uint32_t idx : Index_bits;
@@ -265,6 +273,8 @@ public:
     }
   };
 
+  using Compact_class_driver_hasher = absl::Hash<Compact_class_driver>;
+
   template <typename H>
   friend H AbslHashValue(H h, const Node_pin &s) {
     return H::combine(std::move(h), s.hidx.get_hash(), (int)s.idx, s.sink);  // Ignore lgraph pointer in hash
@@ -299,9 +309,9 @@ public:
     return Compact_class_driver(get_root_idx());
   }
 
-  Lgraph *        get_top_lgraph() const { return top_g; };
-  Lgraph *        get_class_lgraph() const { return current_g; };
-  Lgraph *        get_lg() const { return current_g; };
+  Lgraph         *get_top_lgraph() const { return top_g; };
+  Lgraph         *get_class_lgraph() const { return current_g; };
+  Lgraph         *get_lg() const { return current_g; };
   Hierarchy_index get_hidx() const { return hidx; };
 
   constexpr Port_ID get_pid() const { return pid; }
@@ -434,7 +444,7 @@ public:
   Bits_t get_offset() const;
 
   const Ann_ssa &get_ssa() const;
-  Ann_ssa *      ref_ssa();
+  Ann_ssa       *ref_ssa();
   bool           has_ssa() const;
   bool           is_connected() const;
   bool           is_connected(const Node_pin &pin) const;
@@ -446,6 +456,8 @@ public:
   Node_pin get_down_pin() const;
   Node_pin get_up_pin() const;
 };
+
+using Node_pin_hasher = absl::Hash<Node_pin>;
 
 namespace mmap_lib {
 template <>

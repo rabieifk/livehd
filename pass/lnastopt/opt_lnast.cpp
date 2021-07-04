@@ -91,9 +91,9 @@ void Opt_lnast::process_plus(std::shared_ptr<Lnast> ln, const Lnast_nid &lnid) {
 
       auto rhs = ln->get_data(child).token.get_text();
 
-      auto val_it = level_forward_val.find(rhs);
+      auto val_it = level_forward_val.find(rhs.data());
       if (val_it == level_forward_val.end()) {
-        auto ref_it = level_forward_ref.find(rhs);
+        auto ref_it = level_forward_ref.find(rhs.data());
         if (ref_it != level_forward_ref.end()) {
           auto ln_txt = ln->add_string(ref_it->second);
           auto lnode  = Lnast_node::create_ref(ln_txt);
@@ -151,9 +151,9 @@ void Opt_lnast::process_plus(std::shared_ptr<Lnast> ln, const Lnast_nid &lnid) {
     auto rhs = ln->get_data(rhs_id).token.get_text();
 
     if (simplified)
-      level_forward_val[lhs] = result;
+      level_forward_val[lhs.data()] = result;
     else
-      level_forward_ref[lhs] = rhs;
+      level_forward_ref[lhs.data()] = rhs;
   }
 }
 
@@ -164,23 +164,23 @@ void Opt_lnast::process_assign(std::shared_ptr<Lnast> ln, const Lnast_nid &lnid)
   auto lhs = ln->get_data(lhs_id).token.get_text();
   auto rhs = ln->get_data(rhs_id).token.get_text();
 
-  auto val_it = level_forward_val.find(rhs);
+  auto val_it = level_forward_val.find(rhs.data());
   if (val_it != level_forward_val.end()) {
     auto ln_txt = ln->add_string(val_it->second.to_pyrope());
     auto lnode  = Lnast_node::create_const(ln_txt);
     ln->set_data(rhs_id, lnode);
 
-    level_forward_val[lhs] = val_it->second;
+    level_forward_val[lhs.data()] = val_it->second;
     return;
   }
 
-  auto ref_it = level_forward_ref.find(rhs);
+  auto ref_it = level_forward_ref.find(rhs.data());
   if (ref_it != level_forward_ref.end()) {
     auto ln_txt = ln->add_string(ref_it->second);
     auto lnode  = Lnast_node::create_ref(ln_txt);
     ln->set_data(rhs_id, lnode);
 
-    level_forward_ref[lhs] = ref_it->second;
+    level_forward_ref[lhs.data()] = ref_it->second;
   }
 }
 
