@@ -78,7 +78,7 @@ protected:
   static _init _static_initializer;
 
   // NOTE: order of operands to maximize code gen when "name" is known (typical case)
-  inline static std::array<std::array<char, static_cast<std::size_t>(Ntype_op::Last_invalid)>, 256>            sink_name2pid;
+  inline static std::array<std::array<int8_t, static_cast<std::size_t>(Ntype_op::Last_invalid)>, 256>          sink_name2pid;
   inline static std::array<std::array<std::string_view, static_cast<std::size_t>(Ntype_op::Last_invalid)>, 11> sink_pid2name;
   inline static std::array<bool, static_cast<std::size_t>(Ntype_op::Last_invalid)>                             ntype2single_input;
   inline static absl::flat_hash_map<std::string, int>                                                          name2pid;
