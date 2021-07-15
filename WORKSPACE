@@ -47,12 +47,12 @@ new_git_repository(
     shallow_since = "1606266902 -0800",
 )
 
-new_git_repository(
+http_archive(
     name = "slang",
     build_file_content = """filegroup(name = "all", srcs = glob(["**"]), visibility = ["//visibility:public"])""",
-    commit = "d25fc6d61be527ef19265075cc93525d513a010f",
-    remote = "https://github.com/MikePopoloski/slang.git",
-    shallow_since = "1623205091 -0400",
+    sha256 = "77e61ea7ce14fd813550c694b4d34f060cb04f5a7a90dd0416898bddb8e7308c",
+    strip_prefix = "slang-44e0b55a01607c2f57ae70145cba3b6da1f0660b",
+    url = "https://github.com/masc-ucsc/slang/archive/44e0b55a01607c2f57ae70145cba3b6da1f0660b.zip",
 )
 
 new_git_repository(
