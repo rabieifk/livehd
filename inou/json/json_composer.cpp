@@ -1,52 +1,63 @@
 /*
-Author: Farzaneh Rabiei, GitHub: https://github.com/rabieifk
+  Author: Farzaneh Rabiei, GitHub: https://github.com/rabieifk
 */
-#include "json_composer.hpp"
 
+#include "json_composer.hpp"
+#include <vector>
 #include <iostream>
 #include <ostream>
-#include <vector>
 
 using namespace std;
 
-namespace jsn {
-
+namespace jsn
+{
+    
 void JsonComposer::Write(const JsonElement* property) const {
   if (property == NULL || property->type == etEndOfList)
     return;
 
-  while (true) {
+  indent += {'\t'};
+  while(true) {
+    auto last_written_key = property->key;
+    if (property->key) {
+      target << indent <<'"' << property->key << "\":\t";
+    }
     auto val = &property->value;
-    if (property->key)
-      target << '"' << property->key << "\":\t";
-    switch (property->type) {
-      case etEndOfList: break;
-      case etInt: target << val->i; break;
-      case etUInt: target << val->u; break;
-      case etBool: target << (val->b ? "true" : "false"); break;
-      case etFloat: target << val->f; break;
-      case etString: target << '"' << val->str << '"'; break;
-      case etObject:
-        target << "{";
-        WriteObject(property);
-        target << "}";
-        break;
-      case etNested:
-        target << "{";
-        Write(val->nested);
-        target << "}";
-        break;
-      case etArray:
-        target << "[";
-        WriteObject(property);
-        target << "]";
-        break;
+    switch (property->type)
+    {
+    case etEndOfList: break;
+    case etInt:     target << val->i; break;
+    case etUInt:    target << val->u; break;
+    case etBool:    target << (val->b ? "true" : "false"); break;
+    case etFloat:   target << val->f; break;
+    case etString:
+      target << '"' << val->str << '"';
+      break;
+    case etObject: 
+      target << "{" << endl;
+      WriteObject(property);
+      target << endl << indent << "}";
+      break;
+    case etNested:
+      target << "{" << endl;
+      Write(val->nested);
+      target << endl << indent << "}";
+      break;
+    case etArray:
+      target << "[";
+      WriteObject(property);
+      target << "]";
+      break;
     }
     property++;
+    current_key = last_written_key;
     if (property->type == etEndOfList)
       break;
-    target << ",\n";
+    WriteDelimiter(); // writes ",\n"
   }
+
+  if (indent.size()>0)
+    indent = indent.substr(0, indent.size()-1);
 }
 
-}  // namespace jsn
+} // namespace jsn

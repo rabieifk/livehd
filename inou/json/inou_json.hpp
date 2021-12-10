@@ -18,3 +18,4 @@ public:
   Inou_json(const Eprp_var &var);
   static void setup();
 };
+
