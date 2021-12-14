@@ -127,7 +127,7 @@ void LGtoYJson::conncet_cell(Module* module, Cell* cell, Node* node) {
     cell->add_connection(module->get_wire(OUT_DRV_NAME(node, 0)));
   } else if (op == Ntype_op::Set_mask) {
   } else if (op == Ntype_op::LT || op == Ntype_op::GT) {
-	cell->add_connection(PIN_WIRE("A"));
+    cell->add_connection(PIN_WIRE("A"));
     cell->add_connection(PIN_WIRE("B"));
     cell->add_connection(module->get_wire(OUT_DRV_NAME(node, 0))); 
   } else if (op == Ntype_op::SHL) {
