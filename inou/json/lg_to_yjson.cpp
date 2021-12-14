@@ -35,7 +35,7 @@ Prototype LGtoYJson::primitives[] = {Prototype(Ntype_op::Invalid, NULL),  // DO 
                                      Prototype(Ntype_op::And, &LGtoYJson::primitive_2inp_ABY),
                                      Prototype(Ntype_op::Or, &LGtoYJson::primitive_2inp_ABY),
                                      Prototype(Ntype_op::Xor, &LGtoYJson::primitive_2inp_ABY),
-                                     Prototype(Ntype_op::Ror, &LGtoYJson::primitive_2inp_ABY),
+                                     Prototype(Ntype_op::Ror, &LGtoYJson::primitive_1inp_AY),
                                      Prototype(Ntype_op::Not, &LGtoYJson::primitive_1inp_AY),
                                      Prototype(Ntype_op::Sext, NULL),
                                      Prototype(Ntype_op::GT, &LGtoYJson::primitive_2inp_ABY),  // Greater Than, also LE = !GT
@@ -127,11 +127,14 @@ void LGtoYJson::conncet_cell(Module* module, Cell* cell, Node* node) {
     cell->add_connection(module->get_wire(OUT_DRV_NAME(node, 0)));
   } else if (op == Ntype_op::Set_mask) {
   } else if (op == Ntype_op::LT || op == Ntype_op::GT) {
+	cell->add_connection(PIN_WIRE("A"));
+    cell->add_connection(PIN_WIRE("B"));
+    cell->add_connection(module->get_wire(OUT_DRV_NAME(node, 0))); 
   } else if (op == Ntype_op::SHL) {
     cell->add_connection(PIN_WIRE("a"));
     cell->add_connection(PIN_WIRE("B"));
     cell->add_connection(module->get_wire(OUT_DRV_NAME(node, 0)));
-  } else if (op == Ntype_op::Not) {
+  } else if (op == Ntype_op::Not || op == Ntype_op::Ror) {
     cell->add_connection(module->get_wire(node->inp_edges()[0].driver.get_wire_name().to_s()));
     cell->add_connection(module->get_wire(node->out_edges()[0].driver.get_wire_name().to_s()));
   } else if (op == Ntype_op::Sub) {
@@ -150,8 +153,7 @@ void LGtoYJson::conncet_cell(Module* module, Cell* cell, Node* node) {
       if (!dpin.is_invalid()) {
       }
     }
-  } else if (op == Ntype_op::And || op == Ntype_op::Or || op == Ntype_op::Xor || op == Ntype_op::Mult || op == Ntype_op::Ror
-             || op == Ntype_op::EQ) {
+  } else if (op == Ntype_op::And || op == Ntype_op::Or || op == Ntype_op::Xor || op == Ntype_op::Mult || op == Ntype_op::EQ) {
     cell->add_connection(module->get_wire(INP_DRV_NAME(node, 0)));
     cell->add_connection(module->get_wire(INP_DRV_NAME(node, 1)));
     cell->add_connection(module->get_wire(OUT_DRV_NAME(node, 0)));
